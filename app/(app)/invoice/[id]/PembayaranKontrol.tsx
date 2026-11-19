@@ -4,13 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { formatRupiah } from "@/lib/format";
 
-const inputCls =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
-const labelCls = "block text-sm font-medium text-zinc-700";
-const btnPrimary =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50";
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50";
+const inputCls = "masukan mt-1 w-full text-sm";
+const labelCls = "label";
+const btnPrimary = "tombol-utama";
+const btnSekunder = "tombol-halus";
 
 function hariIni() {
   const d = new Date();
@@ -79,11 +76,7 @@ export default function PanelPembayaran({
     <>
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -95,16 +88,16 @@ export default function PanelPembayaran({
             setForm((f) => ({ ...f, jumlah: String(sisa > 0 ? sisa : 0) }));
             setTerbuka(true);
           }}
-          className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+          className="tombol-mini"
         >
           + Catat pembayaran
         </button>
       </div>
 
       {terbuka && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="text-base font-semibold">Catat pembayaran</h3>
+        <div className="modal-overlay">
+          <div className="modal-kaca max-h-[90vh] w-full max-w-md overflow-y-auto p-6">
+            <h3 className="text-base font-semibold text-slate-100">Catat pembayaran</h3>
             <form onSubmit={simpan} className="mt-4 space-y-4">
               <div>
                 <label className={labelCls} htmlFor="f-jumlah">
@@ -121,7 +114,7 @@ export default function PanelPembayaran({
                   className={inputCls}
                 />
                 {sisa > 0 && (
-                  <p className="mt-1 text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-slate-500">
                     Sisa tagihan: {formatRupiah(sisa)}
                   </p>
                 )}
@@ -226,7 +219,7 @@ export function HapusPembayaran({
     <button
       onClick={hapus}
       title="Hapus pembayaran"
-      className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-xs text-zinc-500 hover:bg-red-50 hover:text-red-600"
+      className="tombol-bahaya"
     >
       Hapus
     </button>

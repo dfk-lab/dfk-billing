@@ -31,15 +31,11 @@ const kosong: FormPelanggan = {
   catatan: "",
 };
 
-const inputCls =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
-const labelCls = "block text-sm font-medium text-zinc-700";
-const btnPrimary =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50";
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50";
-const btnBahaya =
-  "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50";
+const inputCls = "masukan mt-1 w-full text-sm";
+const labelCls = "label";
+const btnPrimary = "tombol-utama";
+const btnSekunder = "tombol-halus";
+const btnBahaya = "tombol-bahaya";
 
 function parseCsv(teks: string): string[][] {
   const teksBersih = teks.replace(/^\uFEFF/, "");
@@ -260,7 +256,7 @@ export default function PelangganClient({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Pelanggan</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-slate-500">
             Kelola data pelanggan dan informasi kontak.
           </p>
         </div>
@@ -276,11 +272,7 @@ export default function PelangganClient({
 
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -292,7 +284,7 @@ export default function PelangganClient({
           placeholder="Cari nama, perusahaan, telepon, atau email…"
           value={kataCari}
           onChange={(e) => setKataCari(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+          className="masukan w-full max-w-sm text-sm"
         />
         <button type="submit" className={btnSekunder}>
           Cari
@@ -311,11 +303,11 @@ export default function PelangganClient({
         )}
       </form>
 
-      <div className="rounded-xl border border-zinc-200 bg-white">
-        <div className="border-b border-zinc-200 px-6 py-4">
+      <div className="kaca">
+        <div className="border-b border-white/10 px-6 py-4">
           <h2 className="text-sm font-semibold">
             Daftar pelanggan{" "}
-            <span className="font-normal text-zinc-500">
+            <span className="font-normal text-slate-500">
               ({daftar.length} pelanggan)
             </span>
           </h2>
@@ -324,7 +316,7 @@ export default function PelangganClient({
         {daftar.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <p className="text-3xl">❖</p>
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-3 text-sm text-slate-500">
               {q
                 ? "Tidak ada pelanggan yang cocok dengan pencarian."
                 : "Belum ada pelanggan. Tambahkan pelanggan pertama Anda."}
@@ -333,9 +325,9 @@ export default function PelangganClient({
         ) : (
           <>
             {/* Tabel — layar sedang ke atas */}
-            <table className="hidden w-full text-left text-sm md:table">
+            <table className="tabel hidden md:table">
               <thead>
-                <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500">
+                <tr className="text-xs uppercase tracking-wide text-slate-500">
                   <th className="px-6 py-3 font-medium">Nama</th>
                   <th className="px-6 py-3 font-medium">Kontak</th>
                   <th className="px-6 py-3 font-medium">Alamat</th>
@@ -344,26 +336,26 @@ export default function PelangganClient({
               </thead>
               <tbody>
                 {daftar.map((p) => (
-                  <tr key={p.id} className="border-b border-zinc-100 last:border-0">
+                  <tr key={p.id} className="border-b border-white/10 last:border-0">
                     <td className="px-6 py-3">
                       <p className="font-medium">{p.nama}</p>
                       {p.perusahaan && (
-                        <p className="text-xs text-zinc-500">{p.perusahaan}</p>
+                        <p className="text-xs text-slate-500">{p.perusahaan}</p>
                       )}
                     </td>
-                    <td className="px-6 py-3 text-zinc-600">
+                    <td className="px-6 py-3 text-slate-400">
                       {p.telepon && <p>{p.telepon}</p>}
                       {p.email && <p className="text-xs">{p.email}</p>}
-                      {!p.telepon && !p.email && <span className="text-zinc-400">—</span>}
+                      {!p.telepon && !p.email && <span className="text-slate-600">—</span>}
                     </td>
-                    <td className="max-w-[220px] px-6 py-3 text-zinc-600">
-                      {p.alamat ?? <span className="text-zinc-400">—</span>}
+                    <td className="max-w-[220px] px-6 py-3 text-slate-400">
+                      {p.alamat ?? <span className="text-slate-600">—</span>}
                     </td>
                     <td className="px-6 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => bukaEdit(p)}
-                          className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                          className="tombol-mini"
                         >
                           Edit
                         </button>
@@ -378,27 +370,27 @@ export default function PelangganClient({
             </table>
 
             {/* Kartu — layar kecil */}
-            <ul className="divide-y divide-zinc-100 md:hidden">
+            <ul className="divide-y divide-white/10 md:hidden">
               {daftar.map((p) => (
                 <li key={p.id} className="space-y-2 px-4 py-4">
                   <div>
                     <p className="font-medium">{p.nama}</p>
                     {p.perusahaan && (
-                      <p className="text-xs text-zinc-500">{p.perusahaan}</p>
+                      <p className="text-xs text-slate-500">{p.perusahaan}</p>
                     )}
                   </div>
                   {(p.telepon || p.email) && (
-                    <p className="text-sm text-zinc-600">
+                    <p className="text-sm text-slate-400">
                       {[p.telepon, p.email].filter(Boolean).join(" · ")}
                     </p>
                   )}
                   {p.alamat && (
-                    <p className="text-sm text-zinc-600">{p.alamat}</p>
+                    <p className="text-sm text-slate-400">{p.alamat}</p>
                   )}
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => bukaEdit(p)}
-                      className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                      className="tombol-mini"
                     >
                       Edit
                     </button>
@@ -414,8 +406,8 @@ export default function PelangganClient({
       </div>
 
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="modal-overlay">
+          <div className="modal-kaca max-h-[90vh] w-full max-w-md overflow-y-auto p-6">
             <h3 className="text-base font-semibold">
               {modal === "baru" ? "Tambah pelanggan" : "Edit pelanggan"}
             </h3>
@@ -513,12 +505,12 @@ export default function PelangganClient({
       )}
 
       {imporTerbuka && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="modal-overlay">
+          <div className="modal-kaca max-h-[90vh] w-full max-w-md overflow-y-auto p-6">
             <h3 className="text-base font-semibold">Impor pelanggan dari CSV</h3>
-            <p className="mt-2 text-xs text-zinc-500">
+            <p className="mt-2 text-xs text-slate-500">
               Header kolom yang dikenali:{" "}
-              <code className="rounded bg-zinc-100 px-1">
+              <code className="rounded bg-white/10 px-1 text-slate-300">
                 nama,perusahaan,email,telepon,alamat,catatan
               </code>{" "}
               — hanya <b>nama</b> yang wajib. Maksimal 500 baris per impor.
@@ -534,18 +526,18 @@ export default function PelangganClient({
               className="mt-4 block w-full text-sm"
             />
             {imporMemproses && (
-              <p className="mt-3 text-sm text-zinc-500">Memproses…</p>
+              <p className="mt-3 text-sm text-slate-500">Memproses…</p>
             )}
             {imporError && (
-              <p className="mt-3 text-sm text-red-600">{imporError}</p>
+              <p className="mt-3 text-sm text-rose-400">{imporError}</p>
             )}
             {imporHasil && (
-              <div className="mt-3 rounded-lg bg-zinc-50 p-3 text-sm">
-                <p className="text-green-700">
+              <div className="mt-3 rounded-lg bg-white/5 p-3 text-sm">
+                <p className="text-emerald-300">
                   Berhasil: {imporHasil.berhasil} · Gagal: {imporHasil.gagal}
                 </p>
                 {imporHasil.detail.length > 0 && (
-                  <ul className="mt-1 list-disc pl-5 text-xs text-zinc-500">
+                  <ul className="mt-1 list-disc pl-5 text-xs text-slate-500">
                     {imporHasil.detail.slice(0, 10).map((d, i) => (
                       <li key={i}>{d}</li>
                     ))}

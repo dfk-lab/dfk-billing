@@ -15,11 +15,11 @@ function Bagian({
 }) {
   if (jumlah === 0) return null;
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white">
-      <div className="border-b border-zinc-200 px-6 py-4">
+    <div className="kaca">
+      <div className="border-b border-white/10 px-6 py-4">
         <h2 className="text-sm font-semibold">
           {judul}{" "}
-          <span className="font-normal text-zinc-500">({jumlah} hasil)</span>
+          <span className="font-normal text-slate-500">({jumlah} hasil)</span>
         </h2>
       </div>
       <div className="px-6 py-4">{children}</div>
@@ -39,7 +39,7 @@ export default async function CariPage({
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Pencarian</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-slate-500">
             Ketik kata kunci di kolom pencarian — invoice, pelanggan, layanan,
             dan kwitansi dicari sekaligus.
           </p>
@@ -118,7 +118,7 @@ export default async function CariPage({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Pencarian</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-slate-500">
           {total > 0
             ? `${total} hasil untuk "${q}"`
             : `Tidak ada hasil untuk "${q}".`}
@@ -144,18 +144,18 @@ export default async function CariPage({
                 <div>
                   <Link
                     href={`/invoice/${inv.id}`}
-                    className="font-medium text-blue-600 hover:underline"
+                    className="font-medium text-cyan-400 hover:text-cyan-300 hover:underline"
                   >
                     {inv.nomor}
                   </Link>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-slate-500">
                     {inv.pelanggan.nama} · {formatTanggal(inv.tanggal.toISOString())}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">{formatRupiah(total)}</p>
                   <p
-                    className={`text-xs ${lunas ? "text-green-700" : "text-amber-600"}`}
+                    className={`text-xs ${lunas ? "text-emerald-300" : "text-amber-400"}`}
                   >
                     {lunas ? "Lunas" : "Belum lunas"}
                   </p>
@@ -173,10 +173,10 @@ export default async function CariPage({
               <div>
                 <p className="font-medium">{p.nama}</p>
                 {p.perusahaan && (
-                  <p className="text-xs text-zinc-500">{p.perusahaan}</p>
+                  <p className="text-xs text-slate-500">{p.perusahaan}</p>
                 )}
               </div>
-              {p.telepon && <p className="text-xs text-zinc-500">{p.telepon}</p>}
+              {p.telepon && <p className="text-xs text-slate-500">{p.telepon}</p>}
             </li>
           ))}
         </ul>
@@ -188,7 +188,7 @@ export default async function CariPage({
             <li key={l.id} className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium">{l.nama}</p>
-                <p className="text-xs text-zinc-500">{l.pelanggan.nama}</p>
+                <p className="text-xs text-slate-500">{l.pelanggan.nama}</p>
               </div>
               <p className="font-medium">{formatRupiah(l.harga)}</p>
             </li>
@@ -202,14 +202,14 @@ export default async function CariPage({
             <li key={k.id} className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium">{k.nomor}</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-slate-500">
                   Untuk {k.pembayaran.invoice.nomor} ·{" "}
                   {formatTanggal(k.pembayaran.tanggal.toISOString())}
                 </p>
               </div>
               <Link
                 href={`/cetak/kwitansi/${k.id}`}
-                className="font-medium text-green-700 hover:underline"
+                className="font-medium text-emerald-300 hover:underline"
               >
                 {formatRupiah(k.pembayaran.jumlah)}
               </Link>

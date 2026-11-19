@@ -29,7 +29,7 @@ npx prisma db push          # buat skema database
 npm run dev
 ```
 
-Buka <http://localhost:3000> — saat pertama kali Anda diminta membuat password admin.
+Buka <http://localhost:4000> — saat pertama kali Anda diminta membuat password admin.
 
 ## Deploy di CasaOS (Docker)
 
@@ -50,7 +50,7 @@ Buka <http://localhost:3000> — saat pertama kali Anda diminta membuat password
    docker compose up -d --build
    ```
 
-4. Aplikasi tersedia di `http://<ip-server>:3000`. Data tersimpan di folder `./data` (database SQLite + cadangan otomatis) — aman di-update karena berada di volume.
+4. Aplikasi tersedia di `http://<ip-server>:4000`. Data tersimpan di folder `./data` (database SQLite + cadangan otomatis) — aman di-update karena berada di volume.
 
 ### Cara 2 — docker run manual
 
@@ -58,7 +58,7 @@ Buka <http://localhost:3000> — saat pertama kali Anda diminta membuat password
 docker build -t dfk-billing .
 mkdir -p data
 docker run -d --name dfk-billing --restart unless-stopped \
-  -p 3000:3000 \
+  -p 4000:4000 \
   -e DATABASE_URL=file:/app/data/dfk.db \
   -e AUTH_SECRET="ganti-dengan-string-acak-panjang" \
   -e CADANGAN_DIR=/app/data/cadangan-otomatis \
@@ -68,7 +68,7 @@ docker run -d --name dfk-billing --restart unless-stopped \
 
 ### Saat pertama kali dijalankan
 
-1. Buka `http://<ip-server>:3000` → halaman login menampilkan **pembuatan password admin** (sekali saja).
+1. Buka `http://<ip-server>:4000` → halaman login menampilkan **pembuatan password admin** (sekali saja).
 2. Masuk ke menu **Pengaturan** → isi identitas usaha, logo, tanda tangan, rekening, awalan nomor dokumen.
 3. Tambah **Pelanggan** → **Layanan** → buat **Invoice** → catat **Pembayaran** (kwitansi terbentuk otomatis).
 4. Untuk langganan berulang, centang **Perpanjang otomatis** pada layanan — invoice periode berikutnya dibuat sendiri saat masa berakhir.

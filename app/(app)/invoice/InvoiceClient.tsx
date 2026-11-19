@@ -31,15 +31,11 @@ export type InvoiceRingkas = {
 
 type FormItem = ItemInput & { kunci: number };
 
-const inputCls =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
-const labelCls = "block text-sm font-medium text-zinc-700";
-const btnPrimary =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50";
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50";
-const btnBahaya =
-  "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50";
+const inputCls = "masukan mt-1 w-full text-sm";
+const labelCls = "label";
+const btnPrimary = "tombol-utama";
+const btnSekunder = "tombol-halus";
+const btnBahaya = "tombol-bahaya";
 
 function hariIni() {
   const d = new Date();
@@ -64,13 +60,13 @@ function formatQty(q: number) {
 
 function badgeStatusEfektif(inv: InvoiceRingkas) {
   if (inv.status === "DRAFT")
-    return { label: "Draft", cls: "bg-zinc-100 text-zinc-600" };
+    return { label: "Draft", cls: "badge-slate" };
   const { total } = hitungTotal(inv.items, inv.diskonPersen, inv.ppnPersen);
   if (total > 0 && inv.totalDibayar >= total)
-    return { label: "Lunas", cls: "bg-green-50 text-green-700" };
+    return { label: "Lunas", cls: "badge-cyan" };
   if (inv.jatuhTempo && sisaHari(inv.jatuhTempo) < 0)
-    return { label: "Jatuh tempo", cls: "bg-red-50 text-red-700" };
-  return { label: "Terkirim", cls: "bg-blue-50 text-blue-700" };
+    return { label: "Jatuh tempo", cls: "badge-rose" };
+  return { label: "Terkirim", cls: "badge-amber" };
 }
 
 let kunciItem = 0;
@@ -284,7 +280,7 @@ export default function InvoiceClient({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Invoice</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-slate-500">
             Buat dan kelola tagihan. Status lunas dihitung dari total pembayaran.
           </p>
         </div>
@@ -294,7 +290,7 @@ export default function InvoiceClient({
       </div>
 
       {pelanggan.length === 0 && (
-        <div className="rounded-lg bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+        <div className="peringatan">
           Belum ada pelanggan. Tambahkan pelanggan dulu di menu{" "}
           <a href="/pelanggan" className="font-semibold underline">
             Pelanggan
@@ -305,11 +301,7 @@ export default function InvoiceClient({
 
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -321,12 +313,12 @@ export default function InvoiceClient({
           placeholder="Cari nomor invoice atau pelanggan…"
           value={kataCari}
           onChange={(e) => setKataCari(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+          className="masukan w-full max-w-sm text-sm"
         />
         <select
           value={statusFilter}
           onChange={(e) => ubahFilterStatus(e.target.value)}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+          className="masukan text-sm"
         >
           <option value="">Semua status</option>
           <option value="DRAFT">Draft</option>
@@ -349,11 +341,11 @@ export default function InvoiceClient({
         )}
       </form>
 
-      <div className="rounded-xl border border-zinc-200 bg-white">
-        <div className="border-b border-zinc-200 px-6 py-4">
-          <h2 className="text-sm font-semibold">
+      <div className="kaca">
+        <div className="border-b border-white/10 px-6 py-4">
+          <h2 className="text-sm font-semibold text-slate-100">
             Daftar invoice{" "}
-            <span className="font-normal text-zinc-500">
+            <span className="font-normal text-slate-500">
               ({daftar.length} invoice)
             </span>
           </h2>
@@ -362,7 +354,7 @@ export default function InvoiceClient({
         {daftar.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <p className="text-3xl">⎘</p>
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-3 text-sm text-slate-500">
               {q || statusFilter
                 ? "Tidak ada invoice yang cocok dengan filter."
                 : "Belum ada invoice. Buat invoice pertama Anda."}
@@ -372,9 +364,9 @@ export default function InvoiceClient({
           <>
             {/* Tabel — layar sedang ke atas */}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left text-sm">
+              <table className="tabel">
                 <thead>
-                  <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500">
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-slate-500">
                     <th className="px-6 py-3 font-medium">Nomor</th>
                     <th className="px-6 py-3 font-medium">Pelanggan</th>
                     <th className="px-6 py-3 font-medium">Tanggal</th>
@@ -392,32 +384,32 @@ export default function InvoiceClient({
                     );
                     const badge = badgeStatusEfektif(inv);
                     return (
-                      <tr key={inv.id} className="border-b border-zinc-100 last:border-0">
+                      <tr key={inv.id} className="border-b border-white/10 last:border-0">
                         <td className="px-6 py-3">
                           <Link
                             href={`/invoice/${inv.id}`}
-                            className="font-medium text-blue-600 hover:underline"
+                            className="font-medium text-cyan-400 hover:text-cyan-300 hover:underline"
                           >
                             {inv.nomor}
                           </Link>
                           {inv.dibuatOtomatis && (
-                            <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500">
+                            <span className="badge badge-slate ml-2">
                               otomatis
                             </span>
                           )}
                         </td>
                         <td className="px-6 py-3">
-                          <p className="text-zinc-700">{inv.pelangganNama}</p>
+                          <p className="text-slate-200">{inv.pelangganNama}</p>
                           {inv.pelangganPerusahaan && (
-                            <p className="text-xs text-zinc-500">
+                            <p className="text-xs text-slate-500">
                               {inv.pelangganPerusahaan}
                             </p>
                           )}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-3 text-zinc-600">
+                        <td className="whitespace-nowrap px-6 py-3 text-slate-400">
                           <p>{formatTanggal(inv.tanggal)}</p>
                           {inv.jatuhTempo && (
-                            <p className="text-xs text-zinc-500">
+                            <p className="text-xs text-slate-500">
                               Jatuh tempo {formatTanggal(inv.jatuhTempo)}
                             </p>
                           )}
@@ -427,7 +419,7 @@ export default function InvoiceClient({
                         </td>
                         <td className="px-6 py-3">
                           <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}
+                            className={`badge ${badge.cls}`}
                           >
                             {badge.label}
                           </span>
@@ -436,20 +428,20 @@ export default function InvoiceClient({
                           <div className="flex flex-wrap justify-end gap-2">
                             <Link
                               href={`/invoice/${inv.id}`}
-                              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              className="tombol-mini"
                             >
                               Detail
                             </Link>
                             <Link
                               href={`/cetak/invoice/${inv.id}`}
                               target="_blank"
-                              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              className="tombol-mini"
                             >
                               Cetak
                             </Link>
                             <button
                               onClick={() => bukaEdit(inv)}
-                              className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                              className="tombol-mini"
                             >
                               Edit
                             </button>
@@ -466,7 +458,7 @@ export default function InvoiceClient({
             </div>
 
             {/* Kartu — layar kecil */}
-            <ul className="divide-y divide-zinc-100 md:hidden">
+            <ul className="divide-y divide-white/10 md:hidden">
               {daftar.map((inv) => {
                 const { total } = hitungTotal(
                   inv.items,
@@ -480,24 +472,24 @@ export default function InvoiceClient({
                       <div>
                         <Link
                           href={`/invoice/${inv.id}`}
-                          className="font-medium text-blue-600"
+                          className="font-medium text-cyan-400"
                         >
                           {inv.nomor}
                         </Link>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-slate-500">
                           {inv.pelangganNama}
                           {inv.pelangganPerusahaan ? ` · ${inv.pelangganPerusahaan}` : ""}
                         </p>
                       </div>
                       <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.cls}`}
+                        className={`badge ${badge.cls}`}
                       >
                         {badge.label}
                       </span>
                     </div>
                     <p className="text-sm">
                       <span className="font-medium">{formatRupiah(total)}</span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-slate-500">
                         {" "}
                         · {formatTanggal(inv.tanggal)}
                         {inv.jatuhTempo ? ` · tempo ${formatTanggal(inv.jatuhTempo)}` : ""}
@@ -506,20 +498,20 @@ export default function InvoiceClient({
                     <div className="flex gap-2 pt-1">
                       <Link
                         href={`/invoice/${inv.id}`}
-                        className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                        className="tombol-mini"
                       >
                         Detail
                       </Link>
                       <Link
                         href={`/cetak/invoice/${inv.id}`}
                         target="_blank"
-                        className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                        className="tombol-mini"
                       >
                         Cetak
                       </Link>
                       <button
                         onClick={() => bukaEdit(inv)}
-                        className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                        className="tombol-mini"
                       >
                         Edit
                       </button>
@@ -536,8 +528,8 @@ export default function InvoiceClient({
       </div>
 
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="modal-overlay">
+          <div className="modal-kaca max-h-[92vh] w-full max-w-2xl overflow-y-auto p-6">
             <h3 className="text-base font-semibold">
               {modal === "baru" ? "Tambah invoice" : `Edit invoice ${pilihan?.nomor}`}
             </h3>
@@ -639,7 +631,7 @@ export default function InvoiceClient({
                   <button
                     type="button"
                     onClick={() => setItems((d) => [...d, itemBaru()])}
-                    className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                    className="tombol-mini"
                   >
                     + Tambah baris
                   </button>
@@ -658,7 +650,7 @@ export default function InvoiceClient({
                         onChange={(e) =>
                           ubahItem(it.kunci, { deskripsi: e.target.value })
                         }
-                        className="col-span-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+                        className="masukan col-span-2 w-full text-sm"
                       />
                       <input
                         type="number"
@@ -670,7 +662,7 @@ export default function InvoiceClient({
                         onChange={(e) =>
                           ubahItem(it.kunci, { qty: Number(e.target.value) })
                         }
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-2 py-2 text-sm focus:border-blue-600 focus:outline-none sm:w-20"
+                        className="masukan w-full text-sm sm:w-20"
                       />
                       <input
                         type="number"
@@ -682,7 +674,7 @@ export default function InvoiceClient({
                         onChange={(e) =>
                           ubahItem(it.kunci, { hargaSatuan: Number(e.target.value) })
                         }
-                        className="w-full rounded-lg border border-zinc-300 bg-white px-2 py-2 text-sm focus:border-blue-600 focus:outline-none sm:w-32"
+                        className="masukan w-full text-sm sm:w-32"
                       />
                       <button
                         type="button"
@@ -692,7 +684,7 @@ export default function InvoiceClient({
                           )
                         }
                         disabled={items.length === 1}
-                        className="justify-self-end rounded-lg border border-zinc-300 bg-white px-2.5 py-2 text-xs text-zinc-500 hover:bg-zinc-50 disabled:opacity-40 sm:mt-1"
+                        className="tombol-mini justify-self-end sm:mt-1"
                         title="Hapus baris"
                       >
                         ✕
@@ -700,7 +692,7 @@ export default function InvoiceClient({
                     </div>
                   ))}
                 </div>
-                <p className="mt-1 text-xs text-zinc-400">
+                <p className="mt-1 text-xs text-slate-600">
                   Kolom: deskripsi · jumlah (qty) · harga satuan (Rp)
                 </p>
               </div>
@@ -753,24 +745,24 @@ export default function InvoiceClient({
                 />
               </div>
 
-              <div className="rounded-lg bg-zinc-50 p-4 text-sm">
-                <div className="flex justify-between text-zinc-600">
+              <div className="rounded-lg bg-white/5 p-4 text-sm">
+                <div className="flex justify-between text-slate-400">
                   <span>Subtotal</span>
                   <span>{formatRupiah(ringkasan.subtotal)}</span>
                 </div>
                 {ringkasan.diskon > 0 && (
-                  <div className="mt-1 flex justify-between text-zinc-600">
+                  <div className="mt-1 flex justify-between text-slate-400">
                     <span>Diskon ({Number(form.diskonPersen) || 0}%)</span>
                     <span>−{formatRupiah(ringkasan.diskon)}</span>
                   </div>
                 )}
                 {ringkasan.ppn > 0 && (
-                  <div className="mt-1 flex justify-between text-zinc-600">
+                  <div className="mt-1 flex justify-between text-slate-400">
                     <span>PPN ({Number(form.ppnPersen) || 0}%)</span>
                     <span>{formatRupiah(ringkasan.ppn)}</span>
                   </div>
                 )}
-                <div className="mt-2 flex justify-between border-t border-zinc-200 pt-2 font-semibold">
+                <div className="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold">
                   <span>Total</span>
                   <span>{formatRupiah(ringkasan.total)}</span>
                 </div>

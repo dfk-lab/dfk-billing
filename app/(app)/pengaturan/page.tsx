@@ -24,10 +24,9 @@ type Pengaturan = {
 
 const UKURAN_GAMBAR_MAKS = 2 * 1024 * 1024;
 
-const labelCls = "block text-sm font-medium text-zinc-700";
-const inputCls =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
-const kartuCls = "rounded-xl border border-zinc-200 bg-white p-6 space-y-5";
+const labelCls = "label";
+const inputCls = "masukan mt-1 w-full text-sm";
+const kartuCls = "kaca p-6 space-y-5";
 
 export default function PengaturanPage() {
   const [form, setForm] = useState<Pengaturan | null>(null);
@@ -120,14 +119,14 @@ export default function PengaturanPage() {
   }
 
   if (!form) {
-    return <p className="text-sm text-zinc-500">Memuat pengaturan…</p>;
+    return <p className="text-sm text-slate-500">Memuat pengaturan…</p>;
   }
 
   return (
     <div className="max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Pengaturan</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-slate-500">
           Identitas usaha ini dipakai di semua invoice dan kwitansi.
         </p>
       </div>
@@ -144,7 +143,7 @@ export default function PengaturanPage() {
                 <img
                   src={logoPratinjau}
                   alt="Logo usaha"
-                  className="h-16 w-16 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+                  className="h-16 w-16 rounded-lg border border-white/20 bg-white object-contain p-1"
                 />
                 <button
                   type="button"
@@ -153,7 +152,7 @@ export default function PengaturanPage() {
                     ubah("logo", null);
                     if (logoRef.current) logoRef.current.value = "";
                   }}
-                  className="text-sm text-red-600 hover:underline"
+                  className="text-sm text-rose-400 hover:underline"
                 >
                   Hapus logo
                 </button>
@@ -174,7 +173,7 @@ export default function PengaturanPage() {
                   }}
                   className="mt-1 block text-sm"
                 />
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-xs text-slate-500">
                   PNG/JPG, maksimal 2 MB. Tampil di kepala invoice dan kwitansi.
                 </p>
               </>
@@ -295,7 +294,7 @@ export default function PengaturanPage() {
                 <img
                   src={ttdPratinjau}
                   alt="Tanda tangan"
-                  className="h-14 rounded-lg border border-zinc-200 bg-white object-contain p-1"
+                  className="h-14 rounded-lg border border-white/20 bg-white object-contain p-1"
                 />
                 <button
                   type="button"
@@ -304,7 +303,7 @@ export default function PengaturanPage() {
                     ubah("gambarTandaTangan", null);
                     if (ttdRef.current) ttdRef.current.value = "";
                   }}
-                  className="text-sm text-red-600 hover:underline"
+                  className="text-sm text-rose-400 hover:underline"
                 >
                   Hapus tanda tangan
                 </button>
@@ -325,7 +324,7 @@ export default function PengaturanPage() {
                   }}
                   className="mt-1 block text-sm"
                 />
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="mt-1 text-xs text-slate-500">
                   Bisa dibiarkan kosong dan gunakan nama penandatangan.
                 </p>
               </>
@@ -344,7 +343,7 @@ export default function PengaturanPage() {
                 onChange={(e) => ubah("prefixInvoice", e.target.value)}
                 className={inputCls}
               />
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-slate-500">
                 Contoh: INV → INV-20261119-001
               </p>
             </div>
@@ -359,7 +358,7 @@ export default function PengaturanPage() {
                 onChange={(e) => ubah("prefixKwitansi", e.target.value)}
                 className={inputCls}
               />
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-slate-500">
                 Contoh: KWT → KWT-20261119-001
               </p>
             </div>
@@ -429,15 +428,15 @@ export default function PengaturanPage() {
           <button
             type="submit"
             disabled={status === "menyimpan"}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+            className="tombol-utama"
           >
             {status === "menyimpan" ? "Menyimpan…" : "Simpan pengaturan"}
           </button>
           {status === "tersimpan" && (
-            <span className="text-sm text-green-600">Tersimpan.</span>
+            <span className="text-sm text-emerald-300">Tersimpan.</span>
           )}
           {status === "gagal" && (
-            <span className="text-sm text-red-600">
+            <span className="text-sm text-rose-400">
               {pesan || "Gagal menyimpan."}
             </span>
           )}
@@ -493,15 +492,15 @@ export default function PengaturanPage() {
             <button
               type="submit"
               disabled={pwStatus === "menyimpan"}
-              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+              className="tombol-halus disabled:opacity-50"
             >
               {pwStatus === "menyimpan" ? "Menyimpan…" : "Ganti password"}
             </button>
             {pwStatus === "berhasil" && (
-              <span className="text-sm text-green-600">Password diganti.</span>
+              <span className="text-sm text-emerald-300">Password diganti.</span>
             )}
             {pwStatus === "gagal" && (
-              <span className="text-sm text-red-600">{pwPesan}</span>
+              <span className="text-sm text-rose-400">{pwPesan}</span>
             )}
           </div>
         </form>

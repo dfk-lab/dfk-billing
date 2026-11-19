@@ -36,15 +36,11 @@ type FormLayanan = {
   perpanjangOtomatis: boolean;
 };
 
-const inputCls =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none";
-const labelCls = "block text-sm font-medium text-zinc-700";
-const btnPrimary =
-  "rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50";
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50";
-const btnBahaya =
-  "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50";
+const inputCls = "masukan mt-1 w-full text-sm";
+const labelCls = "label";
+const btnPrimary = "tombol-utama";
+const btnSekunder = "tombol-halus";
+const btnBahaya = "tombol-bahaya";
 
 function kosongForm(pelangganId: string): FormLayanan {
   return {
@@ -65,26 +61,18 @@ function badgeMasaAktif(tanggalAkhir: string | null, status: string) {
   const sisa = sisaHari(tanggalAkhir);
   if (sisa < 0)
     return (
-      <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
-        Berakhir
-      </span>
+      <span className="badge badge-rose">Berakhir</span>
     );
   if (sisa === 0)
     return (
-      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-        Berakhir hari ini
-      </span>
+      <span className="badge badge-amber">Berakhir hari ini</span>
     );
   if (sisa <= 30)
     return (
-      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-        {sisa} hari lagi
-      </span>
+      <span className="badge badge-amber">{sisa} hari lagi</span>
     );
   return (
-    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
-      {sisa} hari lagi
-    </span>
+    <span className="badge badge-slate">{sisa} hari lagi</span>
   );
 }
 
@@ -92,9 +80,7 @@ function badgeAuto(l: Layanan) {
   if (!l.perpanjangOtomatis || l.periode === "SEKALI" || l.status !== "AKTIF")
     return null;
   return (
-    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-      Auto
-    </span>
+    <span className="badge badge-cyan">Auto</span>
   );
 }
 
@@ -203,7 +189,7 @@ export default function LayananClient({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Layanan</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-slate-500">
             Kelola layanan dan langganan pelanggan — dasar pembuatan invoice.
           </p>
         </div>
@@ -213,7 +199,7 @@ export default function LayananClient({
       </div>
 
       {pelanggan.length === 0 && (
-        <div className="rounded-lg bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+        <div className="peringatan">
           Belum ada pelanggan. Tambahkan pelanggan dulu di menu{" "}
           <a href="/pelanggan" className="font-semibold underline">
             Pelanggan
@@ -224,11 +210,7 @@ export default function LayananClient({
 
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -240,7 +222,7 @@ export default function LayananClient({
           placeholder="Cari nama layanan, deskripsi, atau pelanggan…"
           value={kataCari}
           onChange={(e) => setKataCari(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+          className="masukan w-full max-w-sm text-sm"
         />
         <button type="submit" className={btnSekunder}>
           Cari
@@ -259,11 +241,11 @@ export default function LayananClient({
         )}
       </form>
 
-      <div className="rounded-xl border border-zinc-200 bg-white">
-        <div className="border-b border-zinc-200 px-6 py-4">
+      <div className="kaca">
+        <div className="border-b border-white/10 px-6 py-4">
           <h2 className="text-sm font-semibold">
             Daftar layanan{" "}
-            <span className="font-normal text-zinc-500">
+            <span className="font-normal text-slate-500">
               ({daftar.length} layanan)
             </span>
           </h2>
@@ -272,7 +254,7 @@ export default function LayananClient({
         {daftar.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <p className="text-3xl">◫</p>
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-3 text-sm text-slate-500">
               {q
                 ? "Tidak ada layanan yang cocok dengan pencarian."
                 : "Belum ada layanan. Tambahkan layanan pertama Anda."}
@@ -282,9 +264,9 @@ export default function LayananClient({
           <>
             {/* Tabel — layar sedang ke atas */}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left text-sm">
+              <table className="tabel">
                 <thead>
-                  <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500">
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-slate-500">
                     <th className="px-6 py-3 font-medium">Layanan</th>
                     <th className="px-6 py-3 font-medium">Pelanggan</th>
                     <th className="px-6 py-3 font-medium">Harga</th>
@@ -294,35 +276,35 @@ export default function LayananClient({
                 </thead>
                 <tbody>
                   {daftar.map((l) => (
-                    <tr key={l.id} className="border-b border-zinc-100 last:border-0">
+                    <tr key={l.id} className="border-b border-white/10 last:border-0">
                       <td className="px-6 py-3">
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{l.nama}</p>
                           <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                            className={`badge ${
                               l.status === "AKTIF"
-                                ? "bg-green-50 text-green-700"
-                                : "bg-zinc-100 text-zinc-600"
+                                ? "badge-cyan"
+                                : "badge-slate"
                             }`}
                           >
                             {LABEL_STATUS_LAYANAN[l.status] ?? l.status}
                           </span>
                         </div>
                         {l.deskripsi && (
-                          <p className="mt-0.5 max-w-[280px] truncate text-xs text-zinc-500">
+                          <p className="mt-0.5 max-w-[280px] truncate text-xs text-slate-500">
                             {l.deskripsi}
                           </p>
                         )}
                       </td>
-                      <td className="px-6 py-3 text-zinc-600">{l.pelangganNama}</td>
+                      <td className="px-6 py-3 text-slate-400">{l.pelangganNama}</td>
                       <td className="whitespace-nowrap px-6 py-3">
                         <p>{formatRupiah(l.harga)}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-slate-500">
                           {LABEL_PERIODE[l.periode] ?? l.periode}
                         </p>
                       </td>
                       <td className="whitespace-nowrap px-6 py-3">
-                        <p className="text-zinc-600">
+                        <p className="text-slate-400">
                           {formatTanggal(l.tanggalMulai)}
                           {l.tanggalAkhir ? ` – ${formatTanggal(l.tanggalAkhir)}` : ""}
                         </p>
@@ -335,7 +317,7 @@ export default function LayananClient({
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => bukaEdit(l)}
-                            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                            className="tombol-mini"
                           >
                             Edit
                           </button>
@@ -351,19 +333,19 @@ export default function LayananClient({
             </div>
 
             {/* Kartu — layar kecil */}
-            <ul className="divide-y divide-zinc-100 md:hidden">
+            <ul className="divide-y divide-white/10 md:hidden">
               {daftar.map((l) => (
                 <li key={l.id} className="space-y-2 px-4 py-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-medium">{l.nama}</p>
-                      <p className="text-xs text-zinc-500">{l.pelangganNama}</p>
+                      <p className="text-xs text-slate-500">{l.pelangganNama}</p>
                     </div>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`badge ${
                         l.status === "AKTIF"
-                          ? "bg-green-50 text-green-700"
-                          : "bg-zinc-100 text-zinc-600"
+                          ? "badge-cyan"
+                          : "badge-slate"
                       }`}
                     >
                       {LABEL_STATUS_LAYANAN[l.status] ?? l.status}
@@ -371,11 +353,11 @@ export default function LayananClient({
                   </div>
                   <p className="text-sm">
                     {formatRupiah(l.harga)}{" "}
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-slate-500">
                       · {LABEL_PERIODE[l.periode] ?? l.periode}
                     </span>
                   </p>
-                  <p className="text-xs text-zinc-600">
+                  <p className="text-xs text-slate-400">
                     {formatTanggal(l.tanggalMulai)}
                     {l.tanggalAkhir ? ` – ${formatTanggal(l.tanggalAkhir)}` : ""}
                   </p>
@@ -384,12 +366,12 @@ export default function LayananClient({
                     {badgeAuto(l)}
                   </div>
                   {l.deskripsi && (
-                    <p className="text-xs text-zinc-500">{l.deskripsi}</p>
+                    <p className="text-xs text-slate-500">{l.deskripsi}</p>
                   )}
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => bukaEdit(l)}
-                      className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                      className="tombol-mini"
                     >
                       Edit
                     </button>
@@ -405,8 +387,8 @@ export default function LayananClient({
       </div>
 
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="modal-overlay">
+          <div className="modal-kaca max-h-[90vh] w-full max-w-md overflow-y-auto p-6">
             <h3 className="text-base font-semibold">
               {modal === "baru" ? "Tambah layanan" : "Edit layanan"}
             </h3>
@@ -544,7 +526,7 @@ export default function LayananClient({
               {form.periode !== "SEKALI" && (
                 <label
                   htmlFor="f-auto"
-                  className="flex cursor-pointer items-start gap-2 rounded-lg bg-zinc-50 px-3 py-2.5 text-sm"
+                  className="flex cursor-pointer items-start gap-2 rounded-lg bg-white/5 px-3 py-2.5 text-sm"
                 >
                   <input
                     id="f-auto"
@@ -553,13 +535,13 @@ export default function LayananClient({
                     onChange={(e) =>
                       setForm({ ...form, perpanjangOtomatis: e.target.checked })
                     }
-                    className="mt-0.5 h-4 w-4 accent-blue-600"
+                    className="mt-0.5 h-4 w-4 accent-cyan-500"
                   />
                   <span>
-                    <span className="font-medium text-zinc-700">
+                    <span className="font-medium text-slate-200">
                       Perpanjang otomatis
                     </span>
-                    <span className="block text-xs text-zinc-500">
+                    <span className="block text-xs text-slate-500">
                       Saat masa aktif berakhir, invoice periode berikutnya
                       dibuat otomatis dan masa layanan diperpanjang.
                     </span>

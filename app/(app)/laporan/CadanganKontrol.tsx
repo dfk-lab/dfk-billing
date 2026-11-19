@@ -48,11 +48,7 @@ export default function CadanganKontrol() {
     <div className="mt-4">
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -61,7 +57,7 @@ export default function CadanganKontrol() {
         <a
           href="/api/cadangan"
           download
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+          className="tombol-utama"
         >
           Unduh cadangan (.json)
         </a>
@@ -79,7 +75,7 @@ export default function CadanganKontrol() {
         <button
           onClick={() => input.current?.click()}
           disabled={memproses}
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+          className="tombol-halus disabled:opacity-50"
         >
           {memproses ? "Memulihkan…" : "Pulihkan dari JSON"}
         </button>

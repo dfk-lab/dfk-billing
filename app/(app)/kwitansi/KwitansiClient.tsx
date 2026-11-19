@@ -19,10 +19,8 @@ export type KwitansiRingkas = {
   pelangganPerusahaan: string | null;
 };
 
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50";
-const btnBahaya =
-  "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50";
+const btnSekunder = "tombol-halus";
+const btnBahaya = "tombol-bahaya";
 
 export default function KwitansiClient({
   daftar,
@@ -76,18 +74,14 @@ export default function KwitansiClient({
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Kwitansi</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-slate-500">
           Bukti pembayaran — otomatis dibuat setiap kali pembayaran dicatat.
         </p>
       </div>
 
       {notifikasi && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            notifikasi.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={notifikasi.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {notifikasi.teks}
         </div>
@@ -99,7 +93,7 @@ export default function KwitansiClient({
           placeholder="Cari nomor kwitansi, invoice, atau pelanggan…"
           value={kataCari}
           onChange={(e) => setKataCari(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none"
+          className="masukan w-full max-w-sm text-sm"
         />
         <button type="submit" className={btnSekunder}>
           Cari
@@ -118,11 +112,11 @@ export default function KwitansiClient({
         )}
       </form>
 
-      <div className="rounded-xl border border-zinc-200 bg-white">
-        <div className="border-b border-zinc-200 px-6 py-4">
-          <h2 className="text-sm font-semibold">
+      <div className="kaca">
+        <div className="border-b border-white/10 px-6 py-4">
+          <h2 className="text-sm font-semibold text-slate-100">
             Daftar kwitansi{" "}
-            <span className="font-normal text-zinc-500">
+            <span className="font-normal text-slate-500">
               ({daftar.length} kwitansi)
             </span>
           </h2>
@@ -131,7 +125,7 @@ export default function KwitansiClient({
         {daftar.length === 0 ? (
           <div className="px-6 py-12 text-center">
             <p className="text-3xl">§</p>
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="mt-3 text-sm text-slate-500">
               {q
                 ? "Tidak ada kwitansi yang cocok dengan pencarian."
                 : "Belum ada kwitansi. Catat pembayaran pada salah satu invoice."}
@@ -141,9 +135,9 @@ export default function KwitansiClient({
           <>
             {/* Tabel — layar sedang ke atas */}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left text-sm">
+              <table className="tabel">
                 <thead>
-                  <tr className="border-b border-zinc-200 text-xs uppercase tracking-wide text-zinc-500">
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-slate-500">
                     <th className="px-6 py-3 font-medium">Nomor kwitansi</th>
                     <th className="px-6 py-3 font-medium">Invoice</th>
                     <th className="px-6 py-3 font-medium">Pelanggan</th>
@@ -155,11 +149,11 @@ export default function KwitansiClient({
                 </thead>
                 <tbody>
                   {daftar.map((k) => (
-                    <tr key={k.id} className="border-b border-zinc-100 last:border-0">
+                    <tr key={k.id} className="border-b border-white/10 last:border-0">
                       <td className="px-6 py-3">
                         <p className="font-medium">{k.nomor}</p>
                         {k.penerima && (
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-xs text-slate-500">
                             Penerima: {k.penerima}
                           </p>
                         )}
@@ -167,23 +161,23 @@ export default function KwitansiClient({
                       <td className="px-6 py-3">
                         <Link
                           href={`/invoice/${k.invoiceId}`}
-                          className="text-blue-600 hover:underline"
+                          className="text-cyan-400 hover:text-cyan-300 hover:underline"
                         >
                           {k.invoiceNomor}
                         </Link>
                       </td>
                       <td className="px-6 py-3">
-                        <p className="text-zinc-700">{k.pelangganNama}</p>
+                        <p className="text-slate-200">{k.pelangganNama}</p>
                         {k.pelangganPerusahaan && (
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-xs text-slate-500">
                             {k.pelangganPerusahaan}
                           </p>
                         )}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-zinc-600">
+                      <td className="whitespace-nowrap px-6 py-3 text-slate-400">
                         {formatTanggal(k.tanggal)}
                       </td>
-                      <td className="px-6 py-3 text-zinc-600">
+                      <td className="px-6 py-3 text-slate-400">
                         {k.metode ? (LABEL_METODE[k.metode] ?? k.metode) : "—"}
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-right font-medium">
@@ -194,7 +188,7 @@ export default function KwitansiClient({
                           <Link
                             href={`/cetak/kwitansi/${k.id}`}
                             target="_blank"
-                            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                            className="tombol-mini"
                           >
                             Cetak
                           </Link>
@@ -210,13 +204,13 @@ export default function KwitansiClient({
             </div>
 
             {/* Kartu — layar kecil */}
-            <ul className="divide-y divide-zinc-100 md:hidden">
+            <ul className="divide-y divide-white/10 md:hidden">
               {daftar.map((k) => (
                 <li key={k.id} className="space-y-2 px-4 py-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-medium">{k.nomor}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-slate-500">
                         {k.pelangganNama}
                         {k.pelangganPerusahaan ? ` · ${k.pelangganPerusahaan}` : ""}
                       </p>
@@ -225,11 +219,11 @@ export default function KwitansiClient({
                       {formatRupiah(k.jumlah)}
                     </p>
                   </div>
-                  <p className="text-xs text-zinc-600">
+                  <p className="text-xs text-slate-400">
                     Invoice{" "}
                     <Link
                       href={`/invoice/${k.invoiceId}`}
-                      className="text-blue-600"
+                      className="text-cyan-400"
                     >
                       {k.invoiceNomor}
                     </Link>{" "}
@@ -237,13 +231,13 @@ export default function KwitansiClient({
                     {k.metode ? ` · ${LABEL_METODE[k.metode] ?? k.metode}` : ""}
                   </p>
                   {k.penerima && (
-                    <p className="text-xs text-zinc-400">Penerima: {k.penerima}</p>
+                    <p className="text-xs text-slate-600">Penerima: {k.penerima}</p>
                   )}
                   <div className="flex gap-2 pt-1">
                     <Link
                       href={`/cetak/kwitansi/${k.id}`}
                       target="_blank"
-                      className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700"
+                      className="tombol-mini"
                     >
                       Cetak
                     </Link>

@@ -8,14 +8,14 @@ export default async function LoginPage() {
   const jumlahPengguna = await prisma.pengguna.count();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-100 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="kaca muncul w-full max-w-sm p-8">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-300 to-cyan-600 text-xl font-bold text-[#041019] shadow-[0_0_24px_-4px_rgba(34,211,238,0.7)]">
             D
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">DFK Billing</h1>
-          <p className="mt-1 text-sm text-zinc-500">Invoice &amp; Kwitansi Tagihan</p>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-100">DFK Billing</h1>
+          <p className="mt-1 text-sm text-slate-400">Invoice &amp; Kwitansi Tagihan</p>
         </div>
         {jumlahPengguna === 0 ? <SetupForm /> : <LoginForm />}
       </div>

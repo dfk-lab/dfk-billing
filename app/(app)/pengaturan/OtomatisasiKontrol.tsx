@@ -13,11 +13,9 @@ type Status = {
   daftar: InfoFile[];
 };
 
-const kartuCls = "rounded-xl border border-zinc-200 bg-white p-6 space-y-5";
-const btnSekunder =
-  "rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50";
-const btnBahaya =
-  "rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50";
+const kartuCls = "kaca p-6 space-y-5";
+const btnSekunder = "tombol-halus disabled:opacity-50";
+const btnBahaya = "tombol-bahaya";
 
 function formatWaktu(iso: string | null) {
   if (!iso) return "belum pernah";
@@ -105,7 +103,7 @@ export default function OtomatisasiKontrol() {
     return (
       <section className={kartuCls}>
         <h2 className="text-base font-semibold">Otomatisasi</h2>
-        <p className="text-sm text-zinc-500">Memuat…</p>
+        <p className="text-sm text-slate-500">Memuat…</p>
       </section>
     );
   }
@@ -114,7 +112,7 @@ export default function OtomatisasiKontrol() {
     <section className={kartuCls}>
       <div>
         <h2 className="text-base font-semibold">Otomatisasi</h2>
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-slate-500">
           {status.schedulerAktif
             ? "Scheduler berjalan — pemeriksaan otomatis setiap 15 menit."
             : "Scheduler tidak aktif (server belum memuat otomatisasi)."}
@@ -122,14 +120,14 @@ export default function OtomatisasiKontrol() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-zinc-200 p-4">
+        <div className="rounded-lg border border-white/10 p-4">
           <h3 className="text-sm font-semibold">Invoice otomatis</h3>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-slate-500">
             Layanan langganan Bulanan/Tahunan dengan opsi &quot;Perpanjang
             otomatis&quot; di halaman Layanan otomatis dibuatkan invoice saat
             masanya berakhir.
           </p>
-          <p className="mt-2 text-xs text-zinc-600">
+          <p className="mt-2 text-xs text-slate-400">
             Terakhir diperiksa: <b>{formatWaktu(status.lastRunInvoiceOtomatis)}</b>
           </p>
           <button
@@ -143,21 +141,21 @@ export default function OtomatisasiKontrol() {
           </button>
         </div>
 
-        <div className="rounded-lg border border-zinc-200 p-4">
+        <div className="rounded-lg border border-white/10 p-4">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
               checked={status.backupOtomatisAktif}
               onChange={(e) => ubahToggle(e.target.checked)}
-              className="h-4 w-4 accent-blue-600"
+              className="h-4 w-4 accent-cyan-500"
             />
             <span className="text-sm font-semibold">Cadangan harian otomatis</span>
           </label>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-slate-500">
             Setiap hari disimpan maksimal 10 file JSON di folder
             cadangan-otomatis di dalam data aplikasi.
           </p>
-          <p className="mt-2 text-xs text-zinc-600">
+          <p className="mt-2 text-xs text-slate-400">
             Terakhir dibuat: <b>{formatWaktu(status.lastRunBackupOtomatis)}</b>
           </p>
           <button
@@ -172,11 +170,7 @@ export default function OtomatisasiKontrol() {
 
       {pesan && (
         <div
-          className={`rounded-lg px-4 py-2.5 text-sm ${
-            pesan.jenis === "ok"
-              ? "bg-green-50 text-green-800"
-              : "bg-red-50 text-red-700"
-          }`}
+          className={pesan.jenis === "ok" ? "notif-ok" : "notif-gagal"}
         >
           {pesan.teks}
         </div>
@@ -185,16 +179,16 @@ export default function OtomatisasiKontrol() {
       <div>
         <h3 className="text-sm font-semibold">
           File cadangan otomatis{" "}
-          <span className="font-normal text-zinc-500">
+          <span className="font-normal text-slate-500">
             ({status.daftar.length} file)
           </span>
         </h3>
         {status.daftar.length === 0 ? (
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-slate-500">
             Belum ada file cadangan otomatis.
           </p>
         ) : (
-          <ul className="mt-2 divide-y divide-zinc-100 rounded-lg border border-zinc-200">
+          <ul className="mt-2 divide-y divide-white/10 rounded-lg border border-white/10">
             {status.daftar.map((f) => (
               <li
                 key={f.nama}
@@ -202,7 +196,7 @@ export default function OtomatisasiKontrol() {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{f.nama}</p>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-slate-500">
                     {formatUkuran(f.ukuran)} ·{" "}
                     {new Intl.DateTimeFormat("id-ID", {
                       day: "numeric",
@@ -217,7 +211,7 @@ export default function OtomatisasiKontrol() {
                 <div className="flex shrink-0 gap-2">
                   <a
                     href={`/api/backup-otomatis/${encodeURIComponent(f.nama)}`}
-                    className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                    className="tombol-mini"
                   >
                     Unduh
                   </a>
@@ -231,7 +225,7 @@ export default function OtomatisasiKontrol() {
         )}
       </div>
 
-      <p className="text-xs text-zinc-500">
+      <p className="text-xs text-slate-500">
         File di sini bisa dipulihkan lewat menu{" "}
         <a href="/laporan" className="font-medium underline">
           Laporan → Cadangan

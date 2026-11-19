@@ -17,7 +17,7 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
+    PORT=4000 \
     HOSTNAME=0.0.0.0
 RUN npm i -g prisma@6.19.3 \
     && addgroup -S nodejs \
@@ -29,5 +29,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma/schema.prisma ./prisma/schema.prisma
 USER nextjs
-EXPOSE 3000
+EXPOSE 4000
 CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]
