@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  color: #18181b;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #171717 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .kertas {
+    box-shadow: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  .kertas-wrap {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}

@@ -1,0 +1,14 @@
+services:
+  dfk-billing:
+    build: .
+    image: dfk-billing
+    container_name: dfk-billing
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/app/data/dfk.db
+      AUTH_SECRET: ${AUTH_SECRET:-SILAKAN-GANTI-KUNCI-INI-DENGAN-STRING-ACAK-PANJANG}
+      CADANGAN_DIR: /app/data/cadangan-otomatis
+    volumes:
+      - ./data:/app/data

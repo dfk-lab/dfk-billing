@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Setting {
+  id                Int      @id @default(autoincrement())
+  namaUsaha         String   @default("DFK Billing")
+  namaPemilik       String?
+  alamat            String?
+  telepon           String?
+  email             String?
+  logo              String?
+  namaBank          String?
+  noRekening        String?
+  atasNamaRekening  String?
+  gambarTandaTangan String?
+  footerDokumen     String?
+  catatanKwitansi   String?
+  prefixInvoice     String   @default("INV")
+  prefixKwitansi    String   @default("KWT")
+  ppnDefault        Float    @default(0)
+  jatuhTempoHari    Int      @default(7)
+  backupOtomatisAktif Boolean @default(true)
+  lastRunInvoiceOtomatis DateTime?
+  lastRunBackupOtomatis  DateTime?
+  updatedAt         DateTime @updatedAt
+}
+
+model Pengguna {
+  id           Int      @id @default(autoincrement())
+  nama         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Pelanggan {
+  id         Int       @id @default(autoincrement())
+  nama       String
+  perusahaan String?
+  email      String?
+  telepon    String?
+  alamat     String?
+  catatan    String?
+  createdAt  DateTime  @default(now())
+  invoices   Invoice[]
+  layanan    Layanan[]
+}
+
+model Layanan {
+  id           Int       @id @default(autoincrement())
+  pelangganId  Int
+  pelanggan    Pelanggan @relation(fields: [pelangganId], references: [id], onDelete: Cascade)
+  nama         String
+  deskripsi    String?
+  harga        Int
+  periode      String    @default("BULANAN")
+  tanggalMulai DateTime  @default(now())
+  tanggalAkhir DateTime?
+  status       String    @default("AKTIF")
+  perpanjangOtomatis Boolean @default(true)
+  invoices     Invoice[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Invoice {
+  id             Int           @id @default(autoincrement())
+  nomor          String        @unique
+  pelangganId    Int
+  pelanggan      Pelanggan     @relation(fields: [pelangganId], references: [id])
+  layananId      Int?
+  layanan        Layanan?      @relation(fields: [layananId], references: [id])
+  tanggal        DateTime      @default(now())
+  jatuhTempo     DateTime?
+  status         String        @default("DRAFT")
+  catatan        String?
+  diskonPersen   Float         @default(0)
+  ppnPersen      Float         @default(0)
+  dibuatOtomatis Boolean       @default(false)
+  items          InvoiceItem[]
+  pembayaran     Pembayaran[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model InvoiceItem {
+  id          Int     @id @default(autoincrement())
+  invoiceId   Int
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  deskripsi   String
+  qty         Float   @default(1)
+  hargaSatuan Int
+}
+
+model Pembayaran {
+  id        Int       @id @default(autoincrement())
+  invoiceId Int
+  invoice   Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tanggal   DateTime  @default(now())
+  jumlah    Int
+  metode    String?
+  catatan   String?
+  kwitansi  Kwitansi?
+  createdAt DateTime  @default(now())
+}
+
+model Kwitansi {
+  id           Int        @id @default(autoincrement())
+  nomor        String     @unique
+  pembayaranId Int        @unique
+  pembayaran   Pembayaran @relation(fields: [pembayaranId], references: [id], onDelete: Cascade)
+  tanggal      DateTime   @default(now())
+  penerima     String?
+  createdAt    DateTime   @default(now())
+}
