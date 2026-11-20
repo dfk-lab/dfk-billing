@@ -17,6 +17,10 @@ const stringFields = [
   "catatanKwitansi",
   "prefixInvoice",
   "prefixKwitansi",
+  "waApiUrl",
+  "waApiUser",
+  "waApiPassword",
+  "waNomorAdmin",
 ] as const;
 
 function ambilData(body: Record<string, unknown>) {
@@ -37,6 +41,9 @@ function ambilData(body: Record<string, unknown>) {
     if (Number.isInteger(n) && n >= 0 && n <= 365) {
       data.jatuhTempoHari = n;
     }
+  }
+  if (body.waAktif !== undefined) {
+    data.waAktif = body.waAktif === true || body.waAktif === "true";
   }
   return data;
 }

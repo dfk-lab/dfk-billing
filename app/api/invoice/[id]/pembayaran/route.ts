@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { dataPembayaran, nomorKwitansiBerikutnya } from "@/lib/pembayaran";
+import { waPembayaranDiterima } from "@/lib/wa";
 
 type Konteks = { params: Promise<{ id: string }> };
 
@@ -41,5 +42,6 @@ export async function POST(request: Request, { params }: Konteks) {
     },
     include: { kwitansi: true },
   });
+  void waPembayaranDiterima(pembayaran.id).catch(() => {});
   return NextResponse.json(pembayaran, { status: 201 });
 }

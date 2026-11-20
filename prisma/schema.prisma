@@ -26,8 +26,14 @@ model Setting {
   ppnDefault        Float    @default(0)
   jatuhTempoHari    Int      @default(7)
   backupOtomatisAktif Boolean @default(true)
+  waAktif             Boolean @default(false)
+  waApiUrl            String  @default("https://wa.dfk.my.id")
+  waApiUser           String?
+  waApiPassword       String?
+  waNomorAdmin        String?
   lastRunInvoiceOtomatis DateTime?
   lastRunBackupOtomatis  DateTime?
+  lastRunPengingatWa     DateTime?
   updatedAt         DateTime @updatedAt
 }
 
@@ -83,6 +89,7 @@ model Invoice {
   diskonPersen   Float         @default(0)
   ppnPersen      Float         @default(0)
   dibuatOtomatis Boolean       @default(false)
+  waPengingatDikirim Boolean  @default(false)
   items          InvoiceItem[]
   pembayaran     Pembayaran[]
   createdAt      DateTime      @default(now())

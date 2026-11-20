@@ -3,6 +3,8 @@ import path from "path";
 import { prisma } from "@/lib/prisma";
 import { nomorInvoiceBerikutnya } from "@/lib/invoice";
 import { dumpCadangan } from "@/lib/cadangan";
+import { formatRupiah, formatTanggal, hitungTotal } from "@/lib/format";
+import { kirimWaAman } from "@/lib/wa";
 
 const PERIODE_BERULANG = ["BULANAN", "TAHUNAN"];
 const MAKS_TANGKAPAN_PER_LAYANAN = 12;
@@ -204,5 +206,77 @@ export async function jalankanTugasHarian() {
     catatan.push(`Cadangan harian: ${nama}.`);
   }
 
+  if (
+    setting.waAktif &&
+    tanggalISO(setting.lastRunPengingatWa ?? new Date(0)) !== hariIni
+  ) {
+    const jumlah = await kirimPengingatJatuhTempo(setting.namaUsaha);
+    catatan.push(`Pengingat WA: ${jumlah} terkirim.`);
+    await prisma.setting.update({
+      where: { id: setting.id },
+      data: { lastRunPengingatWa: new Date() },
+    });
+  }
+
   return catatan;
+}
+
+async function kirimPengingatJatuhTempo(namaUsaha: string): Promise<number> {
+  const mulai = hariIniUTC();
+  const selesai = new Date(mulai.getTime() + 86400000);
+
+  const daftar = await prisma.invoice.findMany({
+    where: {
+      status: { not: "DRAFT" },
+      waPengingatDikirim: false,
+      jatuhTempo: { gte: mulai, lt: selesai },
+    },
+    include: {
+      pelanggan: { select: { nama: true, telepon: true } },
+      items: true,
+      pembayaran: { select: { jumlah: true } },
+    },
+  });
+
+  let terkirim = 0;
+  for (const inv of daftar) {
+    const total = hitungTotal(
+      inv.items.map((it) => ({
+        deskripsi: it.deskripsi,
+        qty: it.qty,
+        hargaSatuan: it.hargaSatuan,
+      })),
+      inv.diskonPersen,
+      inv.ppnPersen
+    ).total;
+    const dibayar = inv.pembayaran.reduce((a, p) => a + p.jumlah, 0);
+
+    if (dibayar >= total) {
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { waPengingatDikirim: true },
+      });
+      continue;
+    }
+    if (!inv.pelanggan.telepon) continue;
+
+    const hasil = await kirimWaAman(
+      inv.pelanggan.telepon,
+      `*${namaUsaha}*\n\n` +
+        `Halo *${inv.pelanggan.nama}*, ini pengingat pembayaran.\n\n` +
+        `No. Invoice: ${inv.nomor}\n` +
+        `Jatuh tempo: HARI INI (${formatTanggal(inv.jatuhTempo!.toISOString())})\n` +
+        `Total: ${formatRupiah(total)}\n` +
+        `Sisa: ${formatRupiah(total - dibayar)}\n\n` +
+        `Mohon segera lakukan pembayaran. Terima kasih.`
+    );
+    if (hasil?.ok) {
+      terkirim += 1;
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { waPengingatDikirim: true },
+      });
+    }
+  }
+  return terkirim;
 }

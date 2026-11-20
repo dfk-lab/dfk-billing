@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { dataInvoice, nomorInvoiceBerikutnya } from "@/lib/invoice";
+import { waInvoiceBaru } from "@/lib/wa";
 
 export async function GET(request: Request) {
   await connection();
@@ -57,6 +58,9 @@ export async function POST(request: Request) {
       },
       include: { items: true, pembayaran: true },
     });
+    if (invoice.status !== "DRAFT") {
+      void waInvoiceBaru(invoice.id).catch(() => {});
+    }
     return NextResponse.json(invoice, { status: 201 });
   } catch {
     return NextResponse.json(
