@@ -52,7 +52,7 @@ export default async function CetakInvoicePage({
 
   return (
     <div data-tema="gelap" className="kertas-wrap min-h-screen overflow-x-auto bg-zinc-100 p-6">
-      <TombolCetak kembaliKe={`/invoice/${invoice.id}`} />
+      <TombolCetak kembaliKe={`/invoice/${invoice.id}`} unduh={`/api/invoice/${invoice.id}/pdf`} />
       <div className="kertas mx-auto w-[210mm] rounded-lg bg-white p-[15mm] text-[11pt] leading-relaxed text-zinc-900 shadow-lg">
         {/* Header */}
         <div className="flex items-start justify-between gap-6 border-b-2 border-zinc-800 pb-4">

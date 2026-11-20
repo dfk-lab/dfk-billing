@@ -7,6 +7,7 @@ const inputCls = "masukan mt-1 w-full text-sm";
 
 export default function LoginForm() {
   const router = useRouter();
+  const [nama, setNama] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [memproses, setMemproses] = useState(false);
@@ -18,7 +19,7 @@ export default function LoginForm() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ nama: nama.trim() || undefined, password }),
     });
     if (res.ok) {
       router.replace("/");
@@ -33,6 +34,20 @@ export default function LoginForm() {
   return (
     <form onSubmit={submit} className="space-y-4">
       <div>
+        <label className="label" htmlFor="nama">
+          Nama pengguna
+        </label>
+        <input
+          id="nama"
+          type="text"
+          autoComplete="username"
+          placeholder="Kosongkan bila hanya ada satu pengguna"
+          value={nama}
+          onChange={(e) => setNama(e.target.value)}
+          className={inputCls}
+        />
+      </div>
+      <div>
         <label className="label" htmlFor="password">
           Password
         </label>
@@ -40,7 +55,7 @@ export default function LoginForm() {
           id="password"
           type="password"
           required
-          autoFocus
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className={inputCls}

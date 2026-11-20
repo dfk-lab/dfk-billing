@@ -17,8 +17,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Akun admin sudah ada." }, { status: 409 });
   }
   const pengguna = await prisma.pengguna.create({
-    data: { nama, passwordHash: hashPassword(password) },
+    data: { nama, passwordHash: hashPassword(password), role: "ADMIN" },
   });
-  await buatSesi(pengguna.id);
+  await buatSesi(pengguna);
   return NextResponse.json({ ok: true });
 }

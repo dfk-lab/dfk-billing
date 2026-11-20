@@ -131,14 +131,27 @@ const menu = [
 ];
 
 const isiBawah = ["/", "/pelanggan", "/invoice", "/kwitansi"];
-const menuBawah = menu.filter((m) => isiBawah.includes(m.href));
-const menuLembar = menu.filter((m) => !isiBawah.includes(m.href));
 
-export default function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({
+  children,
+  role = "ADMIN",
+  namaPengguna = null,
+}: {
+  children: React.ReactNode;
+  role?: string;
+  namaPengguna?: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [lembar, setLembar] = useState(false);
   const [kataCari, setKataCari] = useState("");
+
+  const menuTersedia =
+    role === "PETUGAS"
+      ? menu.filter((m) => m.href !== "/pengaturan" && m.href !== "/laporan")
+      : menu;
+  const menuBawah = menuTersedia.filter((m) => isiBawah.includes(m.href));
+  const menuLembar = menuTersedia.filter((m) => !isiBawah.includes(m.href));
 
   useEffect(() => {
     setLembar(false);
@@ -180,6 +193,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </span>
           </span>
         </Link>
+        {namaPengguna && (
+          <p className="px-5 pb-2 text-xs text-slate-500">
+            Masuk sebagai{" "}
+            <span className="font-medium text-slate-300">{namaPengguna}</span>
+          </p>
+        )}
 
         <div className="px-4 pb-3">
           <form onSubmit={cari}>
@@ -194,7 +213,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
-          {menu.map((item) => (
+          {menuTersedia.map((item) => (
             <Link
               key={item.href}
               href={item.href}

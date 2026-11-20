@@ -2,8 +2,12 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { COOKIE_SESI, tandatanganToken, verifikasiToken } from "@/lib/session";
 
-export async function buatSesi(penggunaId: number) {
-  const token = await tandatanganToken(penggunaId);
+export async function buatSesi(pengguna: {
+  id: number;
+  nama: string;
+  role: string;
+}) {
+  const token = await tandatanganToken(pengguna);
   (await cookies()).set(COOKIE_SESI, token, {
     httpOnly: true,
     sameSite: "lax",

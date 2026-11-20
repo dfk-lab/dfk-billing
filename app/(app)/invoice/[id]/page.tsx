@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatRupiah, formatTanggal, hitungTotal, LABEL_METODE } from "@/lib/format";
 import PanelPembayaran, { HapusPembayaran } from "./PembayaranKontrol";
+import KirimWaInvoice from "./KirimWaInvoice";
+import PaymentLinkKontrol from "./PaymentLinkKontrol";
 
 export const instant = false;
 
@@ -77,13 +79,24 @@ export default async function DetailInvoicePage({
             )}
           </h1>
         </div>
-        <a
-          href={`/cetak/invoice/${invoice.id}`}
-          target="_blank"
-          className="tombol-utama"
-        >
-          Cetak invoice
-        </a>
+        <div className="flex gap-2">
+          <KirimWaInvoice
+            invoiceId={invoice.id}
+            telepon={invoice.pelanggan.telepon}
+            draft={invoice.status === "DRAFT"}
+            waAktif={setting?.waAktif ?? false}
+          />
+          <a href={`/api/invoice/${invoice.id}/pdf`} className="tombol-halus">
+            Unduh PDF
+          </a>
+          <a
+            href={`/cetak/invoice/${invoice.id}`}
+            target="_blank"
+            className="tombol-utama"
+          >
+            Cetak invoice
+          </a>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -226,6 +239,17 @@ export default async function DetailInvoicePage({
           </div>
 
           <div className="space-y-3">
+            {(setting?.midtransAktif || invoice.paymentLinkUrl) && (
+              <div className="kaca p-6">
+                <PaymentLinkKontrol
+                  invoiceId={invoice.id}
+                  sisa={sisa}
+                  draft={invoice.status === "DRAFT"}
+                  midtransAktif={setting?.midtransAktif ?? false}
+                  urlAwal={invoice.paymentLinkUrl}
+                />
+              </div>
+            )}
             <PanelPembayaran
               invoiceId={invoice.id}
               sisa={sisa}

@@ -21,6 +21,11 @@ const stringFields = [
   "waApiUser",
   "waApiPassword",
   "waNomorAdmin",
+  "waTemplateTagihan",
+  "waTemplateKwitansi",
+  "midtransServerKey",
+  "midtransMode",
+  "midtransApiUrl",
 ] as const;
 
 function ambilData(body: Record<string, unknown>) {
@@ -44,6 +49,21 @@ function ambilData(body: Record<string, unknown>) {
   }
   if (body.waAktif !== undefined) {
     data.waAktif = body.waAktif === true || body.waAktif === "true";
+  }
+  if (body.waPengingatPelangganAktif !== undefined) {
+    data.waPengingatPelangganAktif =
+      body.waPengingatPelangganAktif === true ||
+      body.waPengingatPelangganAktif === "true";
+  }
+  if (body.midtransAktif !== undefined) {
+    data.midtransAktif =
+      body.midtransAktif === true || body.midtransAktif === "true";
+  }
+  if (typeof body.midtransMode === "string") {
+    const mode = body.midtransMode.trim();
+    if (mode === "sandbox" || mode === "produksi") {
+      data.midtransMode = mode;
+    }
   }
   return data;
 }

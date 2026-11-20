@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { formatRupiah, formatTanggal, hitungTotal } from "@/lib/format";
+import { formatRupiah, formatTanggal, hitungTotal, LABEL_METODE } from "@/lib/format";
+import {
+  DEFAULT_TEMPLATE_KWITANSI,
+  DEFAULT_TEMPLATE_TAGIHAN,
+  isiTemplate,
+} from "@/lib/wa-template";
 
 export function normalisasiNomor(input: string): string | null {
   const d = input.replace(/\D/g, "");
@@ -167,4 +172,100 @@ export async function waPembayaranDiterima(
     `\nTerima kasih.`;
 
   return kirimWaAman(bayar.invoice.pelanggan.telepon, pesan);
+}
+
+async function ringkasanTagihan(invoiceId: number) {
+  return prisma.invoice.findUnique({
+    where: { id: invoiceId },
+    include: {
+      pelanggan: { select: { nama: true, telepon: true } },
+      items: true,
+      pembayaran: { select: { jumlah: true } },
+    },
+  });
+}
+
+export async function waKirimTagihanKePelanggan(
+  invoiceId: number,
+  ketTempo = ""
+): Promise<HasilWa> {
+  const inv = await ringkasanTagihan(invoiceId);
+  if (!inv) return { ok: false, pesan: "Invoice tidak ditemukan." };
+  if (inv.status === "DRAFT") {
+    return { ok: false, pesan: "Invoice masih draft — terbitkan dulu." };
+  }
+  if (!inv.pelanggan.telepon) {
+    return { ok: false, pesan: "Pelanggan tidak memiliki nomor WhatsApp." };
+  }
+
+  const { total } = hitungTotal(
+    inv.items.map((it) => ({
+      deskripsi: it.deskripsi,
+      qty: it.qty,
+      hargaSatuan: it.hargaSatuan,
+    })),
+    inv.diskonPersen,
+    inv.ppnPersen
+  );
+  const dibayar = inv.pembayaran.reduce((a, p) => a + p.jumlah, 0);
+  const sisa = Math.max(total - dibayar, 0);
+
+  const setting = await prisma.setting.findFirst();
+  const teks = setting?.waTemplateTagihan?.trim() || DEFAULT_TEMPLATE_TAGIHAN;
+  const pesan = isiTemplate(teks, {
+    namaUsaha: setting?.namaUsaha?.trim() || "DFK Billing",
+    nama: inv.pelanggan.nama,
+    nomor: inv.nomor,
+    total: formatRupiah(total),
+    sisa: formatRupiah(sisa),
+    jatuhTempo: inv.jatuhTempo
+      ? formatTanggal(inv.jatuhTempo.toISOString())
+      : "—",
+    ketTempo,
+    linkBayar: inv.paymentLinkUrl ?? "",
+  });
+
+  const hasil = await kirimWaAman(inv.pelanggan.telepon, pesan);
+  return hasil ?? { ok: false, pesan: "Gagal mengirim WhatsApp." };
+}
+
+export async function waKirimKwitansiKePelanggan(
+  kwitansiId: number
+): Promise<HasilWa> {
+  const k = await prisma.kwitansi.findUnique({
+    where: { id: kwitansiId },
+    include: {
+      pembayaran: {
+        include: {
+          invoice: {
+            include: { pelanggan: { select: { nama: true, telepon: true } } },
+          },
+        },
+      },
+    },
+  });
+  if (!k) return { ok: false, pesan: "Kwitansi tidak ditemukan." };
+  if (!k.pembayaran.invoice.pelanggan.telepon) {
+    return { ok: false, pesan: "Pelanggan tidak memiliki nomor WhatsApp." };
+  }
+
+  const setting = await prisma.setting.findFirst();
+  const teks = setting?.waTemplateKwitansi?.trim() || DEFAULT_TEMPLATE_KWITANSI;
+  const pesan = isiTemplate(teks, {
+    namaUsaha: setting?.namaUsaha?.trim() || "DFK Billing",
+    nama: k.pembayaran.invoice.pelanggan.nama,
+    nomorKwitansi: k.nomor,
+    nomorInvoice: k.pembayaran.invoice.nomor,
+    jumlah: formatRupiah(k.pembayaran.jumlah),
+    metode: k.pembayaran.metode
+      ? LABEL_METODE[k.pembayaran.metode] ?? k.pembayaran.metode
+      : "—",
+    tanggal: formatTanggal(k.pembayaran.tanggal.toISOString()),
+  });
+
+  const hasil = await kirimWaAman(
+    k.pembayaran.invoice.pelanggan.telepon,
+    pesan
+  );
+  return hasil ?? { ok: false, pesan: "Gagal mengirim WhatsApp." };
 }

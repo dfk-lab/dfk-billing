@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { nomorInvoiceBerikutnya } from "@/lib/invoice";
 import { dumpCadangan } from "@/lib/cadangan";
 import { formatRupiah, formatTanggal, hitungTotal } from "@/lib/format";
-import { kirimWaAman } from "@/lib/wa";
+import { kirimWaAman, waKirimTagihanKePelanggan } from "@/lib/wa";
 
 const PERIODE_BERULANG = ["BULANAN", "TAHUNAN"];
 const MAKS_TANGKAPAN_PER_LAYANAN = 12;
@@ -218,6 +218,19 @@ export async function jalankanTugasHarian() {
     });
   }
 
+  if (
+    setting.waAktif &&
+    setting.waPengingatPelangganAktif &&
+    tanggalISO(setting.lastRunPengingatWaPelanggan ?? new Date(0)) !== hariIni
+  ) {
+    const jumlah = await kirimPengingatPelanggan();
+    catatan.push(`Pengingat WA pelanggan: ${jumlah} terkirim.`);
+    await prisma.setting.update({
+      where: { id: setting.id },
+      data: { lastRunPengingatWaPelanggan: new Date() },
+    });
+  }
+
   return catatan;
 }
 
@@ -275,6 +288,101 @@ async function kirimPengingatJatuhTempo(namaUsaha: string): Promise<number> {
       await prisma.invoice.update({
         where: { id: inv.id },
         data: { waPengingatDikirim: true },
+      });
+    }
+  }
+  return terkirim;
+}
+
+function mulaiHariUTC(d: Date) {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+const SATU_HARI = 86400000;
+
+// Stage per invoice: 1 = pengingat H-3 terkirim, 2 = H-1, 3 = lewat tempo.
+async function kirimPengingatPelanggan(): Promise<number> {
+  const mulai = hariIniUTC();
+
+  const daftar = await prisma.invoice.findMany({
+    where: {
+      status: { not: "DRAFT" },
+      waPengingatPelangganStage: { lt: 3 },
+      OR: [
+        {
+          jatuhTempo: {
+            gte: new Date(mulai.getTime() + 3 * SATU_HARI),
+            lt: new Date(mulai.getTime() + 4 * SATU_HARI),
+          },
+        },
+        {
+          jatuhTempo: {
+            gte: new Date(mulai.getTime() + SATU_HARI),
+            lt: new Date(mulai.getTime() + 2 * SATU_HARI),
+          },
+        },
+        {
+          jatuhTempo: {
+            gte: new Date(mulai.getTime() - 30 * SATU_HARI),
+            lt: mulai,
+          },
+        },
+      ],
+    },
+    include: {
+      pelanggan: { select: { nama: true, telepon: true } },
+      items: true,
+      pembayaran: { select: { jumlah: true } },
+    },
+  });
+
+  let terkirim = 0;
+  for (const inv of daftar) {
+    if (!inv.jatuhTempo) continue;
+    const jt = mulaiHariUTC(inv.jatuhTempo);
+    let target = 0;
+    let ketTempo = "";
+    if (jt.getTime() >= mulai.getTime() + 3 * SATU_HARI) {
+      target = 1;
+      ketTempo = " (3 hari lagi)";
+    } else if (jt.getTime() >= mulai.getTime() + SATU_HARI) {
+      target = 2;
+      ketTempo = " (besok)";
+    } else {
+      target = 3;
+      const n = Math.max(
+        1,
+        Math.round((mulai.getTime() - jt.getTime()) / SATU_HARI)
+      );
+      ketTempo = ` (TERLAMBAT ${n} hari)`;
+    }
+    if (inv.waPengingatPelangganStage >= target) continue;
+
+    const total = hitungTotal(
+      inv.items.map((it) => ({
+        deskripsi: it.deskripsi,
+        qty: it.qty,
+        hargaSatuan: it.hargaSatuan,
+      })),
+      inv.diskonPersen,
+      inv.ppnPersen
+    ).total;
+    const dibayar = inv.pembayaran.reduce((a, p) => a + p.jumlah, 0);
+    if (dibayar >= total) {
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { waPengingatPelangganStage: 3 },
+      });
+      continue;
+    }
+    if (!inv.pelanggan.telepon) continue;
+
+    const hasil = await waKirimTagihanKePelanggan(inv.id, ketTempo);
+    if (hasil.ok) {
+      terkirim += 1;
+      await prisma.invoice.update({
+        where: { id: inv.id },
+        data: { waPengingatPelangganStage: target },
       });
     }
   }

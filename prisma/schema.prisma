@@ -31,9 +31,17 @@ model Setting {
   waApiUser           String?
   waApiPassword       String?
   waNomorAdmin        String?
+  waPengingatPelangganAktif Boolean @default(false)
+  waTemplateTagihan   String  @default("*{namaUsaha}*\n\nHalo *{nama}*, berikut tagihan Anda.\n\nNo. Invoice: {nomor}\nJatuh tempo: {jatuhTempo}{ketTempo}\nTotal: {total}\nSisa: {sisa}\n\nMohon segera lakukan pembayaran. Terima kasih.")
+  waTemplateKwitansi  String  @default("*{namaUsaha}*\n\nHalo *{nama}*, pembayaran Anda telah kami terima.\n\nNo. Kwitansi: {nomorKwitansi}\nNo. Invoice: {nomorInvoice}\nJumlah: {jumlah}\nTanggal: {tanggal}\n\nTerima kasih atas kepercayaan Anda.")
+  midtransAktif       Boolean @default(false)
+  midtransServerKey   String  @default("")
+  midtransMode        String  @default("sandbox")
+  midtransApiUrl      String  @default("")
   lastRunInvoiceOtomatis DateTime?
   lastRunBackupOtomatis  DateTime?
   lastRunPengingatWa     DateTime?
+  lastRunPengingatWaPelanggan DateTime?
   updatedAt         DateTime @updatedAt
 }
 
@@ -41,6 +49,8 @@ model Pengguna {
   id           Int      @id @default(autoincrement())
   nama         String
   passwordHash String
+  role         String   @default("ADMIN")
+  aktif        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -90,6 +100,10 @@ model Invoice {
   ppnPersen      Float         @default(0)
   dibuatOtomatis Boolean       @default(false)
   waPengingatDikirim Boolean  @default(false)
+  waPengingatPelangganStage Int @default(0)
+  paymentLinkId     String?
+  paymentLinkUrl    String?
+  paymentLinkOrderId String?
   items          InvoiceItem[]
   pembayaran     Pembayaran[]
   createdAt      DateTime      @default(now())

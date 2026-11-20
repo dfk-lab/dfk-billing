@@ -18,6 +18,7 @@ export type KwitansiRingkas = {
   invoiceId: number;
   pelangganNama: string;
   pelangganPerusahaan: string | null;
+  pelangganTelepon: string | null;
 };
 
 const btnSekunder = "tombol-halus";
@@ -36,6 +37,7 @@ export default function KwitansiClient({
     jenis: "ok" | "gagal";
     teks: string;
   } | null>(null);
+  const [kirimId, setKirimId] = useState<number | null>(null);
 
   const nilaiKwitansi = useMemo(() => {
     const kini = new Date();
@@ -80,6 +82,27 @@ export default function KwitansiClient({
       setNotifikasi({
         jenis: "gagal",
         teks: data?.error ?? "Gagal menghapus kwitansi.",
+      });
+    }
+  }
+
+  async function kirimWa(k: KwitansiRingkas) {
+    setKirimId(k.id);
+    const res = await fetch(`/api/kwitansi/${k.id}/wa`, { method: "POST" });
+    const data = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      pesan?: string;
+    } | null;
+    setKirimId(null);
+    if (res.ok && data?.ok) {
+      setNotifikasi({
+        jenis: "ok",
+        teks: `Kwitansi ${k.nomor} terkirim ke ${k.pelangganNama}.`,
+      });
+    } else {
+      setNotifikasi({
+        jenis: "gagal",
+        teks: data?.pesan || `Gagal mengirim kwitansi ${k.nomor}.`,
       });
     }
   }
@@ -228,6 +251,18 @@ export default function KwitansiClient({
                       </td>
                       <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => kirimWa(k)}
+                            disabled={!k.pelangganTelepon || kirimId === k.id}
+                            title={
+                              k.pelangganTelepon
+                                ? `Kirim bukti pembayaran ke WA ${k.pelangganNama}`
+                                : "Pelanggan tidak punya nomor WA"
+                            }
+                            className={btnSekunder}
+                          >
+                            {kirimId === k.id ? "Mengirim…" : "Kirim WA"}
+                          </button>
                           <Link
                             href={`/cetak/kwitansi/${k.id}`}
                             target="_blank"
@@ -235,6 +270,12 @@ export default function KwitansiClient({
                           >
                             Cetak
                           </Link>
+                          <a
+                            href={`/api/kwitansi/${k.id}/pdf`}
+                            className="tombol-mini"
+                          >
+                            PDF
+                          </a>
                           <button onClick={() => hapus(k)} className={btnBahaya}>
                             Hapus
                           </button>
@@ -277,6 +318,13 @@ export default function KwitansiClient({
                     <p className="text-xs text-slate-600">Penerima: {k.penerima}</p>
                   )}
                   <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => kirimWa(k)}
+                      disabled={!k.pelangganTelepon || kirimId === k.id}
+                      className={btnSekunder}
+                    >
+                      {kirimId === k.id ? "Mengirim…" : "Kirim WA"}
+                    </button>
                     <Link
                       href={`/cetak/kwitansi/${k.id}`}
                       target="_blank"
@@ -284,6 +332,9 @@ export default function KwitansiClient({
                     >
                       Cetak
                     </Link>
+                    <a href={`/api/kwitansi/${k.id}/pdf`} className="tombol-mini">
+                      PDF
+                    </a>
                     <button onClick={() => hapus(k)} className={btnBahaya}>
                       Hapus
                     </button>

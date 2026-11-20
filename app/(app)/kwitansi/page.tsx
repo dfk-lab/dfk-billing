@@ -37,7 +37,9 @@ export default async function KwitansiPage({
             select: {
               id: true,
               nomor: true,
-              pelanggan: { select: { nama: true, perusahaan: true } },
+              pelanggan: {
+                select: { nama: true, perusahaan: true, telepon: true },
+              },
             },
           },
         },
@@ -58,6 +60,7 @@ export default async function KwitansiPage({
     invoiceId: k.pembayaran.invoice.id,
     pelangganNama: k.pembayaran.invoice.pelanggan.nama,
     pelangganPerusahaan: k.pembayaran.invoice.pelanggan.perusahaan,
+    pelangganTelepon: k.pembayaran.invoice.pelanggan.telepon,
   }));
 
   return <KwitansiClient daftar={serial} q={q} />;
