@@ -346,6 +346,86 @@ export default function PengaturanPage() {
             </div>
           </section>
 
+          {/* Tanda tangan & catatan dokumen */}
+          <section className={kartuCls}>
+            <h2 className="text-base font-semibold">Tanda tangan &amp; catatan</h2>
+
+            <div>
+              <span className={labelCls}>Gambar tanda tangan (opsional)</span>
+              {ttdPratinjau ? (
+                <div className="mt-2 flex items-center gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={ttdPratinjau}
+                    alt="Tanda tangan"
+                    className="h-14 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTtdPratinjau(null);
+                      ubah("gambarTandaTangan", null);
+                      if (ttdRef.current) ttdRef.current.value = "";
+                    }}
+                    className="text-sm text-rose-400 hover:underline"
+                  >
+                    Hapus tanda tangan
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={ttdRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file)
+                        pilihGambar(file, (dataUrl) => {
+                          setTtdPratinjau(dataUrl);
+                          ubah("gambarTandaTangan", dataUrl);
+                        });
+                    }}
+                    className="mt-1 block text-sm"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Bisa dibiarkan kosong dan gunakan nama penandatangan.
+                  </p>
+                </>
+              )}
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="catatanKwitansi">
+                Catatan default kwitansi
+              </label>
+              <textarea
+                id="catatanKwitansi"
+                rows={3}
+                placeholder="Contoh: Pembayaran sudah diterima dan tidak dapat ditarik kembali."
+                value={form.catatanKwitansi ?? ""}
+                onChange={(e) =>
+                  ubah("catatanKwitansi", e.target.value || null)
+                }
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="footerDokumen">
+                Catatan kaki invoice / kwitansi
+              </label>
+              <textarea
+                id="footerDokumen"
+                rows={3}
+                placeholder="Contoh: Terima kasih telah menggunakan layanan kami."
+                value={form.footerDokumen ?? ""}
+                onChange={(e) =>
+                  ubah("footerDokumen", e.target.value || null)
+                }
+                className={inputCls}
+              />
+            </div>
+          </section>
+
           {/* Dokumen & penomoran */}
           <section className={kartuCls}>
             <h2 className="text-base font-semibold">Dokumen &amp; penomoran</h2>
@@ -411,88 +491,8 @@ export default function PengaturanPage() {
             </div>
           </section>
 
-          {/* Tanda tangan & catatan dokumen */}
-          <section className={kartuCls}>
-            <h2 className="text-base font-semibold">Tanda tangan &amp; catatan</h2>
-
-            <div>
-              <span className={labelCls}>Gambar tanda tangan (opsional)</span>
-              {ttdPratinjau ? (
-                <div className="mt-2 flex items-center gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={ttdPratinjau}
-                    alt="Tanda tangan"
-                    className="h-14 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTtdPratinjau(null);
-                      ubah("gambarTandaTangan", null);
-                      if (ttdRef.current) ttdRef.current.value = "";
-                    }}
-                    className="text-sm text-rose-400 hover:underline"
-                  >
-                    Hapus tanda tangan
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <input
-                    ref={ttdRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file)
-                        pilihGambar(file, (dataUrl) => {
-                          setTtdPratinjau(dataUrl);
-                          ubah("gambarTandaTangan", dataUrl);
-                        });
-                    }}
-                    className="mt-1 block text-sm"
-                  />
-                  <p className="mt-1 text-xs text-slate-500">
-                    Bisa dibiarkan kosong dan gunakan nama penandatangan.
-                  </p>
-                </>
-              )}
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="catatanKwitansi">
-                Catatan default kwitansi
-              </label>
-              <textarea
-                id="catatanKwitansi"
-                rows={2}
-                placeholder="Contoh: Pembayaran sudah diterima dan tidak dapat ditarik kembali."
-                value={form.catatanKwitansi ?? ""}
-                onChange={(e) =>
-                  ubah("catatanKwitansi", e.target.value || null)
-                }
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="footerDokumen">
-                Catatan kaki invoice / kwitansi
-              </label>
-              <textarea
-                id="footerDokumen"
-                rows={2}
-                placeholder="Contoh: Terima kasih telah menggunakan layanan kami."
-                value={form.footerDokumen ?? ""}
-                onChange={(e) =>
-                  ubah("footerDokumen", e.target.value || null)
-                }
-                className={inputCls}
-              />
-            </div>
-          </section>
-
           {/* Notifikasi WhatsApp */}
-          <section className={kartuCls}>
+          <section className={`${kartuCls} lg:col-span-3`}>
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold">Notifikasi WhatsApp</h2>
               <label className="flex shrink-0 items-center gap-2 text-sm text-slate-200">
@@ -510,61 +510,63 @@ export default function PengaturanPage() {
               pembayaran diterima, dan pengingat jatuh tempo (otomatis harian).
             </p>
 
-            <div>
-              <label className={labelCls} htmlFor="waApiUrl">
-                URL gateway
-              </label>
-              <input
-                id="waApiUrl"
-                type="text"
-                value={form.waApiUrl}
-                onChange={(e) => ubah("waApiUrl", e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="waApiUser">
-                Username basic auth
-              </label>
-              <input
-                id="waApiUser"
-                type="text"
-                autoComplete="off"
-                value={form.waApiUser ?? ""}
-                onChange={(e) => ubah("waApiUser", e.target.value || null)}
-                className={inputCls}
-              />
-              <p className="mt-1 text-xs text-slate-500">
-                Kosongkan jika gateway tanpa basic auth.
-              </p>
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="waApiPassword">
-                Password basic auth
-              </label>
-              <input
-                id="waApiPassword"
-                type="password"
-                autoComplete="new-password"
-                value={form.waApiPassword ?? ""}
-                onChange={(e) => ubah("waApiPassword", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="waNomorAdmin">
-                Nomor WhatsApp admin
-              </label>
-              <input
-                id="waNomorAdmin"
-                type="tel"
-                value={form.waNomorAdmin ?? ""}
-                onChange={(e) => ubah("waNomorAdmin", e.target.value || null)}
-                className={inputCls}
-              />
-              <p className="mt-1 text-xs text-slate-500">
-                Untuk uji kirim. Format bebas: 08xx atau 62xx.
-              </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className={labelCls} htmlFor="waApiUrl">
+                  URL gateway
+                </label>
+                <input
+                  id="waApiUrl"
+                  type="text"
+                  value={form.waApiUrl}
+                  onChange={(e) => ubah("waApiUrl", e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="waApiUser">
+                  Username basic auth
+                </label>
+                <input
+                  id="waApiUser"
+                  type="text"
+                  autoComplete="off"
+                  value={form.waApiUser ?? ""}
+                  onChange={(e) => ubah("waApiUser", e.target.value || null)}
+                  className={inputCls}
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Kosongkan jika gateway tanpa basic auth.
+                </p>
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="waApiPassword">
+                  Password basic auth
+                </label>
+                <input
+                  id="waApiPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={form.waApiPassword ?? ""}
+                  onChange={(e) => ubah("waApiPassword", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="waNomorAdmin">
+                  Nomor WhatsApp admin
+                </label>
+                <input
+                  id="waNomorAdmin"
+                  type="tel"
+                  value={form.waNomorAdmin ?? ""}
+                  onChange={(e) => ubah("waNomorAdmin", e.target.value || null)}
+                  className={inputCls}
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Untuk uji kirim. Format bebas: 08xx atau 62xx.
+                </p>
+              </div>
             </div>
 
             <div className="border-t border-white/10 pt-4">
@@ -585,95 +587,96 @@ export default function PengaturanPage() {
               </p>
             </div>
 
-            <div className="border-t border-white/10 pt-4">
-              <div className="flex items-center justify-between gap-2">
-                <label className={labelCls} htmlFor="waTemplateTagihan">
-                  Template pesan tagihan
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setLihatPratinjau(
-                      lihatPratinjau === "tagihan" ? null : "tagihan"
-                    )
-                  }
-                  className="text-xs text-cyan-400 hover:text-cyan-300"
-                >
-                  {lihatPratinjau === "tagihan"
-                    ? "Tutup pratinjau"
-                    : "Lihat pratinjau"}
-                </button>
-              </div>
-              <p className="mt-1 flex flex-wrap gap-1 text-xs text-slate-500">
-                Variabel:{" "}
-                {VAR_TAGIHAN.map((v) => (
-                  <code
-                    key={v}
-                    className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[11px] text-slate-300"
+            <div className="grid gap-5 border-t border-white/10 pt-4 lg:grid-cols-2">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <label className={labelCls} htmlFor="waTemplateTagihan">
+                    Template pesan tagihan
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLihatPratinjau(
+                        lihatPratinjau === "tagihan" ? null : "tagihan"
+                      )
+                    }
+                    className="text-xs text-cyan-400 hover:text-cyan-300"
                   >
-                    {`{${v}}`}
-                  </code>
-                ))}
-              </p>
-              <textarea
-                id="waTemplateTagihan"
-                rows={9}
-                value={form.waTemplateTagihan}
-                onChange={(e) => ubah("waTemplateTagihan", e.target.value)}
-                className={`${inputCls} font-mono`}
-              />
-              {lihatPratinjau === "tagihan" && (
-                <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
-                  {isiTemplate(form.waTemplateTagihan, CONTOH_VAR_TAGIHAN)}
-                </pre>
-              )}
-              <p className="mt-1 text-xs text-slate-500">
-                {ketTempoKeterangan}
-              </p>
-            </div>
-
-            <div className="border-t border-white/10 pt-4">
-              <div className="flex items-center justify-between gap-2">
-                <label className={labelCls} htmlFor="waTemplateKwitansi">
-                  Template pesan kwitansi
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setLihatPratinjau(
-                      lihatPratinjau === "kwitansi" ? null : "kwitansi"
-                    )
-                  }
-                  className="text-xs text-cyan-400 hover:text-cyan-300"
-                >
-                  {lihatPratinjau === "kwitansi"
-                    ? "Tutup pratinjau"
-                    : "Lihat pratinjau"}
-                </button>
+                    {lihatPratinjau === "tagihan"
+                      ? "Tutup pratinjau"
+                      : "Lihat pratinjau"}
+                  </button>
+                </div>
+                <p className="mt-1 flex flex-wrap gap-1 text-xs text-slate-500">
+                  Variabel:{" "}
+                  {VAR_TAGIHAN.map((v) => (
+                    <code
+                      key={v}
+                      className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[11px] text-slate-300"
+                    >
+                      {`{${v}}`}
+                    </code>
+                  ))}
+                </p>
+                <textarea
+                  id="waTemplateTagihan"
+                  rows={9}
+                  value={form.waTemplateTagihan}
+                  onChange={(e) => ubah("waTemplateTagihan", e.target.value)}
+                  className={`${inputCls} font-mono`}
+                />
+                {lihatPratinjau === "tagihan" && (
+                  <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
+                    {isiTemplate(form.waTemplateTagihan, CONTOH_VAR_TAGIHAN)}
+                  </pre>
+                )}
+                <p className="mt-1 text-xs text-slate-500">
+                  {ketTempoKeterangan}
+                </p>
               </div>
-              <p className="mt-1 flex flex-wrap gap-1 text-xs text-slate-500">
-                Variabel:{" "}
-                {VAR_KWITANSI.map((v) => (
-                  <code
-                    key={v}
-                    className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[11px] text-slate-300"
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <label className={labelCls} htmlFor="waTemplateKwitansi">
+                    Template pesan kwitansi
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLihatPratinjau(
+                        lihatPratinjau === "kwitansi" ? null : "kwitansi"
+                      )
+                    }
+                    className="text-xs text-cyan-400 hover:text-cyan-300"
                   >
-                    {`{${v}}`}
-                  </code>
-                ))}
-              </p>
-              <textarea
-                id="waTemplateKwitansi"
-                rows={9}
-                value={form.waTemplateKwitansi}
-                onChange={(e) => ubah("waTemplateKwitansi", e.target.value)}
-                className={`${inputCls} font-mono`}
-              />
-              {lihatPratinjau === "kwitansi" && (
-                <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
-                  {isiTemplate(form.waTemplateKwitansi, CONTOH_VAR_KWITANSI)}
-                </pre>
-              )}
+                    {lihatPratinjau === "kwitansi"
+                      ? "Tutup pratinjau"
+                      : "Lihat pratinjau"}
+                  </button>
+                </div>
+                <p className="mt-1 flex flex-wrap gap-1 text-xs text-slate-500">
+                  Variabel:{" "}
+                  {VAR_KWITANSI.map((v) => (
+                    <code
+                      key={v}
+                      className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[11px] text-slate-300"
+                    >
+                      {`{${v}}`}
+                    </code>
+                  ))}
+                </p>
+                <textarea
+                  id="waTemplateKwitansi"
+                  rows={9}
+                  value={form.waTemplateKwitansi}
+                  onChange={(e) => ubah("waTemplateKwitansi", e.target.value)}
+                  className={`${inputCls} font-mono`}
+                />
+                {lihatPratinjau === "kwitansi" && (
+                  <pre className="mt-2 whitespace-pre-wrap rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
+                    {isiTemplate(form.waTemplateKwitansi, CONTOH_VAR_KWITANSI)}
+                  </pre>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -785,7 +788,7 @@ export default function PengaturanPage() {
         </form>
 
         {/* Keamanan */}
-        <section className={kartuCls}>
+        <section className={`${kartuCls} lg:col-start-3`}>
           <h2 className="text-base font-semibold">Keamanan</h2>
           <form onSubmit={simpanPassword} className="space-y-4">
             <div>
