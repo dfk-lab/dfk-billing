@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import StripAngka from "@/components/StripAngka";
 
 export type Pelanggan = {
   id: number;
@@ -269,6 +270,25 @@ export default function PelangganClient({
           </button>
         </div>
       </div>
+
+      <StripAngka
+        kartu={[
+          { label: "Total pelanggan", nilai: String(daftar.length) },
+          {
+            label: "Ada nomor WA",
+            nilai: String(daftar.filter((p) => p.telepon).length),
+            aksen: "text-cyan-300",
+          },
+          {
+            label: "Ada email",
+            nilai: String(daftar.filter((p) => p.email).length),
+          },
+          {
+            label: "Ada perusahaan",
+            nilai: String(daftar.filter((p) => p.perusahaan).length),
+          },
+        ]}
+      />
 
       {notifikasi && (
         <div

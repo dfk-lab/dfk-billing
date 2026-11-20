@@ -20,6 +20,11 @@ type Pengaturan = {
   prefixKwitansi: string;
   ppnDefault: number;
   jatuhTempoHari: number;
+  waAktif: boolean;
+  waApiUrl: string;
+  waApiUser: string | null;
+  waApiPassword: string | null;
+  waNomorAdmin: string | null;
 };
 
 const UKURAN_GAMBAR_MAKS = 2 * 1024 * 1024;
@@ -46,6 +51,10 @@ export default function PengaturanPage() {
     "idle" | "menyimpan" | "berhasil" | "gagal"
   >("idle");
   const [pwPesan, setPwPesan] = useState("");
+  const [ujiStatus, setUjiStatus] = useState<
+    "idle" | "mengirim" | "ok" | "gagal"
+  >("idle");
+  const [ujiPesan, setUjiPesan] = useState("");
 
   useEffect(() => {
     fetch("/api/pengaturan")
@@ -91,6 +100,38 @@ export default function PengaturanPage() {
     }
   }
 
+  async function ujiKirim() {
+    if (!form) return;
+    if (!form.waNomorAdmin?.trim()) {
+      setUjiStatus("gagal");
+      setUjiPesan("Isi nomor WhatsApp admin terlebih dahulu.");
+      return;
+    }
+    setUjiStatus("mengirim");
+    setUjiPesan("");
+    const res = await fetch("/api/pengaturan/wa-uji", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nomor: form.waNomorAdmin,
+        url: form.waApiUrl,
+        user: form.waApiUser ?? "",
+        pass: form.waApiPassword ?? "",
+      }),
+    });
+    const data = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      pesan?: string;
+    } | null;
+    if (res.ok && data?.ok) {
+      setUjiStatus("ok");
+      setUjiPesan(data.pesan || "Terkirim ke nomor admin.");
+    } else {
+      setUjiStatus("gagal");
+      setUjiPesan(data?.pesan || "Gagal mengirim uji coba.");
+    }
+  }
+
   async function simpanPassword(e: React.FormEvent) {
     e.preventDefault();
     if (pwBaru !== pwKonfirmasi) {
@@ -123,7 +164,7 @@ export default function PengaturanPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Pengaturan</h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -131,207 +172,164 @@ export default function PengaturanPage() {
         </p>
       </div>
 
-      <form onSubmit={simpan} className="space-y-6">
-        <section className={kartuCls}>
-          <h2 className="text-base font-semibold">Identitas usaha</h2>
+      <div className="grid grid-flow-dense gap-4 lg:grid-cols-3">
+        <form onSubmit={simpan} className="contents">
+          {/* Identitas usaha */}
+          <section className={`${kartuCls} lg:col-span-2`}>
+            <h2 className="text-base font-semibold">Identitas usaha</h2>
 
-          <div>
-            <span className={labelCls}>Logo usaha</span>
-            {logoPratinjau ? (
-              <div className="mt-2 flex items-center gap-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logoPratinjau}
-                  alt="Logo usaha"
-                  className="h-16 w-16 rounded-lg border border-white/20 bg-white object-contain p-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLogoPratinjau(null);
-                    ubah("logo", null);
-                    if (logoRef.current) logoRef.current.value = "";
-                  }}
-                  className="text-sm text-rose-400 hover:underline"
-                >
-                  Hapus logo
-                </button>
-              </div>
-            ) : (
-              <>
+            <div>
+              <span className={labelCls}>Logo usaha</span>
+              {logoPratinjau ? (
+                <div className="mt-2 flex items-center gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logoPratinjau}
+                    alt="Logo usaha"
+                    className="h-16 w-16 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLogoPratinjau(null);
+                      ubah("logo", null);
+                      if (logoRef.current) logoRef.current.value = "";
+                    }}
+                    className="text-sm text-rose-400 hover:underline"
+                  >
+                    Hapus logo
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={logoRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file)
+                        pilihGambar(file, (dataUrl) => {
+                          setLogoPratinjau(dataUrl);
+                          ubah("logo", dataUrl);
+                        });
+                    }}
+                    className="mt-1 block text-sm"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    PNG/JPG, maksimal 2 MB. Tampil di kepala invoice dan kwitansi.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className={labelCls} htmlFor="namaUsaha">
+                  Nama usaha
+                </label>
                 <input
-                  ref={logoRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file)
-                      pilihGambar(file, (dataUrl) => {
-                        setLogoPratinjau(dataUrl);
-                        ubah("logo", dataUrl);
-                      });
-                  }}
-                  className="mt-1 block text-sm"
+                  id="namaUsaha"
+                  type="text"
+                  required
+                  value={form.namaUsaha}
+                  onChange={(e) => ubah("namaUsaha", e.target.value)}
+                  className={inputCls}
                 />
-                <p className="mt-1 text-xs text-slate-500">
-                  PNG/JPG, maksimal 2 MB. Tampil di kepala invoice dan kwitansi.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className={labelCls} htmlFor="namaUsaha">
-                Nama usaha
-              </label>
-              <input
-                id="namaUsaha"
-                type="text"
-                required
-                value={form.namaUsaha}
-                onChange={(e) => ubah("namaUsaha", e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="namaPemilik">
-                Nama pemilik / penandatangan
-              </label>
-              <input
-                id="namaPemilik"
-                type="text"
-                value={form.namaPemilik ?? ""}
-                onChange={(e) => ubah("namaPemilik", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="telepon">
-                Telepon / WhatsApp
-              </label>
-              <input
-                id="telepon"
-                type="tel"
-                value={form.telepon ?? ""}
-                onChange={(e) => ubah("telepon", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelCls} htmlFor="alamat">
-                Alamat usaha
-              </label>
-              <textarea
-                id="alamat"
-                rows={2}
-                value={form.alamat ?? ""}
-                onChange={(e) => ubah("alamat", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelCls} htmlFor="email">
-                Email usaha
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={form.email ?? ""}
-                onChange={(e) => ubah("email", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="namaBank">
-                Nama bank
-              </label>
-              <input
-                id="namaBank"
-                type="text"
-                value={form.namaBank ?? ""}
-                onChange={(e) => ubah("namaBank", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls} htmlFor="noRekening">
-                Nomor rekening
-              </label>
-              <input
-                id="noRekening"
-                type="text"
-                value={form.noRekening ?? ""}
-                onChange={(e) => ubah("noRekening", e.target.value || null)}
-                className={inputCls}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className={labelCls} htmlFor="atasNamaRekening">
-                Atas nama rekening
-              </label>
-              <input
-                id="atasNamaRekening"
-                type="text"
-                value={form.atasNamaRekening ?? ""}
-                onChange={(e) =>
-                  ubah("atasNamaRekening", e.target.value || null)
-                }
-                className={inputCls}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className={kartuCls}>
-          <h2 className="text-base font-semibold">Dokumen &amp; penomoran</h2>
-
-          <div>
-            <span className={labelCls}>Gambar tanda tangan (opsional)</span>
-            {ttdPratinjau ? (
-              <div className="mt-2 flex items-center gap-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={ttdPratinjau}
-                  alt="Tanda tangan"
-                  className="h-14 rounded-lg border border-white/20 bg-white object-contain p-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTtdPratinjau(null);
-                    ubah("gambarTandaTangan", null);
-                    if (ttdRef.current) ttdRef.current.value = "";
-                  }}
-                  className="text-sm text-rose-400 hover:underline"
-                >
-                  Hapus tanda tangan
-                </button>
               </div>
-            ) : (
-              <>
+              <div>
+                <label className={labelCls} htmlFor="namaPemilik">
+                  Nama pemilik / penandatangan
+                </label>
                 <input
-                  ref={ttdRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file)
-                      pilihGambar(file, (dataUrl) => {
-                        setTtdPratinjau(dataUrl);
-                        ubah("gambarTandaTangan", dataUrl);
-                      });
-                  }}
-                  className="mt-1 block text-sm"
+                  id="namaPemilik"
+                  type="text"
+                  value={form.namaPemilik ?? ""}
+                  onChange={(e) => ubah("namaPemilik", e.target.value || null)}
+                  className={inputCls}
                 />
-                <p className="mt-1 text-xs text-slate-500">
-                  Bisa dibiarkan kosong dan gunakan nama penandatangan.
-                </p>
-              </>
-            )}
-          </div>
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="telepon">
+                  Telepon / WhatsApp
+                </label>
+                <input
+                  id="telepon"
+                  type="tel"
+                  value={form.telepon ?? ""}
+                  onChange={(e) => ubah("telepon", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelCls} htmlFor="alamat">
+                  Alamat usaha
+                </label>
+                <textarea
+                  id="alamat"
+                  rows={2}
+                  value={form.alamat ?? ""}
+                  onChange={(e) => ubah("alamat", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="email">
+                  Email usaha
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={form.email ?? ""}
+                  onChange={(e) => ubah("email", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="atasNamaRekening">
+                  Atas nama rekening
+                </label>
+                <input
+                  id="atasNamaRekening"
+                  type="text"
+                  value={form.atasNamaRekening ?? ""}
+                  onChange={(e) =>
+                    ubah("atasNamaRekening", e.target.value || null)
+                  }
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="namaBank">
+                  Nama bank
+                </label>
+                <input
+                  id="namaBank"
+                  type="text"
+                  value={form.namaBank ?? ""}
+                  onChange={(e) => ubah("namaBank", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls} htmlFor="noRekening">
+                  Nomor rekening
+                </label>
+                <input
+                  id="noRekening"
+                  type="text"
+                  value={form.noRekening ?? ""}
+                  onChange={(e) => ubah("noRekening", e.target.value || null)}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+          </section>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Dokumen & penomoran */}
+          <section className={kartuCls}>
+            <h2 className="text-base font-semibold">Dokumen &amp; penomoran</h2>
+
             <div>
               <label className={labelCls} htmlFor="prefixInvoice">
                 Awalan nomor invoice
@@ -391,7 +389,57 @@ export default function PengaturanPage() {
                 className={inputCls}
               />
             </div>
-            <div className="sm:col-span-2">
+          </section>
+
+          {/* Tanda tangan & catatan dokumen */}
+          <section className={kartuCls}>
+            <h2 className="text-base font-semibold">Tanda tangan &amp; catatan</h2>
+
+            <div>
+              <span className={labelCls}>Gambar tanda tangan (opsional)</span>
+              {ttdPratinjau ? (
+                <div className="mt-2 flex items-center gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={ttdPratinjau}
+                    alt="Tanda tangan"
+                    className="h-14 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTtdPratinjau(null);
+                      ubah("gambarTandaTangan", null);
+                      if (ttdRef.current) ttdRef.current.value = "";
+                    }}
+                    className="text-sm text-rose-400 hover:underline"
+                  >
+                    Hapus tanda tangan
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={ttdRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file)
+                        pilihGambar(file, (dataUrl) => {
+                          setTtdPratinjau(dataUrl);
+                          ubah("gambarTandaTangan", dataUrl);
+                        });
+                    }}
+                    className="mt-1 block text-sm"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Bisa dibiarkan kosong dan gunakan nama penandatangan.
+                  </p>
+                </>
+              )}
+            </div>
+            <div>
               <label className={labelCls} htmlFor="catatanKwitansi">
                 Catatan default kwitansi
               </label>
@@ -406,7 +454,7 @@ export default function PengaturanPage() {
                 className={inputCls}
               />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className={labelCls} htmlFor="footerDokumen">
                 Catatan kaki invoice / kwitansi
               </label>
@@ -421,32 +469,126 @@ export default function PengaturanPage() {
                 className={inputCls}
               />
             </div>
+          </section>
+
+          {/* Notifikasi WhatsApp */}
+          <section className={kartuCls}>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-base font-semibold">Notifikasi WhatsApp</h2>
+              <label className="flex shrink-0 items-center gap-2 text-sm text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={form.waAktif}
+                  onChange={(e) => ubah("waAktif", e.target.checked)}
+                  className="h-4 w-4 accent-cyan-500"
+                />
+                Aktif
+              </label>
+            </div>
+            <p className="text-xs text-slate-500">
+              Mengirim WA via gateway GoWA ke pelanggan saat invoice terbit,
+              pembayaran diterima, dan pengingat jatuh tempo (otomatis harian).
+            </p>
+
+            <div>
+              <label className={labelCls} htmlFor="waApiUrl">
+                URL gateway
+              </label>
+              <input
+                id="waApiUrl"
+                type="text"
+                value={form.waApiUrl}
+                onChange={(e) => ubah("waApiUrl", e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="waApiUser">
+                Username basic auth
+              </label>
+              <input
+                id="waApiUser"
+                type="text"
+                autoComplete="off"
+                value={form.waApiUser ?? ""}
+                onChange={(e) => ubah("waApiUser", e.target.value || null)}
+                className={inputCls}
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Kosongkan jika gateway tanpa basic auth.
+              </p>
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="waApiPassword">
+                Password basic auth
+              </label>
+              <input
+                id="waApiPassword"
+                type="password"
+                autoComplete="new-password"
+                value={form.waApiPassword ?? ""}
+                onChange={(e) => ubah("waApiPassword", e.target.value || null)}
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="waNomorAdmin">
+                Nomor WhatsApp admin
+              </label>
+              <input
+                id="waNomorAdmin"
+                type="tel"
+                value={form.waNomorAdmin ?? ""}
+                onChange={(e) => ubah("waNomorAdmin", e.target.value || null)}
+                className={inputCls}
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Untuk uji kirim. Format bebas: 08xx atau 62xx.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={ujiKirim}
+                disabled={ujiStatus === "mengirim"}
+                className="tombol-halus"
+              >
+                {ujiStatus === "mengirim" ? "Mengirim…" : "Uji kirim ke admin"}
+              </button>
+              {ujiStatus === "ok" && (
+                <span className="text-sm text-emerald-300">{ujiPesan}</span>
+              )}
+              {ujiStatus === "gagal" && (
+                <span className="text-sm text-rose-400">{ujiPesan}</span>
+              )}
+            </div>
+          </section>
+
+          {/* Simpan */}
+          <div className="flex items-center gap-3 lg:col-span-3">
+            <button
+              type="submit"
+              disabled={status === "menyimpan"}
+              className="tombol-utama"
+            >
+              {status === "menyimpan" ? "Menyimpan…" : "Simpan pengaturan"}
+            </button>
+            {status === "tersimpan" && (
+              <span className="text-sm text-emerald-300">Tersimpan.</span>
+            )}
+            {status === "gagal" && (
+              <span className="text-sm text-rose-400">
+                {pesan || "Gagal menyimpan."}
+              </span>
+            )}
           </div>
-        </section>
+        </form>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={status === "menyimpan"}
-            className="tombol-utama"
-          >
-            {status === "menyimpan" ? "Menyimpan…" : "Simpan pengaturan"}
-          </button>
-          {status === "tersimpan" && (
-            <span className="text-sm text-emerald-300">Tersimpan.</span>
-          )}
-          {status === "gagal" && (
-            <span className="text-sm text-rose-400">
-              {pesan || "Gagal menyimpan."}
-            </span>
-          )}
-        </div>
-      </form>
-
-      <section className={kartuCls}>
-        <h2 className="text-base font-semibold">Keamanan</h2>
-        <form onSubmit={simpanPassword} className="space-y-4">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+        {/* Keamanan */}
+        <section className={kartuCls}>
+          <h2 className="text-base font-semibold">Keamanan</h2>
+          <form onSubmit={simpanPassword} className="space-y-4">
             <div>
               <label className={labelCls} htmlFor="pwLama">
                 Password lama
@@ -487,25 +629,31 @@ export default function PengaturanPage() {
                 className={inputCls}
               />
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={pwStatus === "menyimpan"}
-              className="tombol-halus disabled:opacity-50"
-            >
-              {pwStatus === "menyimpan" ? "Menyimpan…" : "Ganti password"}
-            </button>
-            {pwStatus === "berhasil" && (
-              <span className="text-sm text-emerald-300">Password diganti.</span>
-            )}
-            {pwStatus === "gagal" && (
-              <span className="text-sm text-rose-400">{pwPesan}</span>
-            )}
-          </div>
-        </form>
-      </section>
-      <OtomatisasiKontrol />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                disabled={pwStatus === "menyimpan"}
+                className="tombol-halus disabled:opacity-50"
+              >
+                {pwStatus === "menyimpan" ? "Menyimpan…" : "Ganti password"}
+              </button>
+              {pwStatus === "berhasil" && (
+                <span className="text-sm text-emerald-300">
+                  Password diganti.
+                </span>
+              )}
+              {pwStatus === "gagal" && (
+                <span className="text-sm text-rose-400">{pwPesan}</span>
+              )}
+            </div>
+          </form>
+        </section>
+
+        {/* Otomatisasi */}
+        <div className="lg:col-span-3">
+          <OtomatisasiKontrol />
+        </div>
+      </div>
     </div>
   );
 }

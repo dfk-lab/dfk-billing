@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import StripAngka from "@/components/StripAngka";
 import {
   formatRupiah,
   formatTanggal,
@@ -139,6 +140,23 @@ export default function InvoiceClient({
       ),
     [items, form.diskonPersen, form.ppnPersen]
   );
+
+  const ringkasanPiutang = useMemo(() => {
+    let belumLunas = 0;
+    let piutang = 0;
+    let segera = 0;
+    for (const inv of daftar) {
+      if (inv.status === "DRAFT") continue;
+      const { total } = hitungTotal(inv.items, inv.diskonPersen, inv.ppnPersen);
+      const sisa = total - inv.totalDibayar;
+      if (sisa <= 0) continue;
+      belumLunas += 1;
+      piutang += sisa;
+      const hari = inv.jatuhTempo ? sisaHari(inv.jatuhTempo) : null;
+      if (hari !== null && hari <= 7) segera += 1;
+    }
+    return { belumLunas, piutang, segera };
+  }, [daftar]);
 
   function bukaBaru() {
     setPilihan(null);
@@ -288,6 +306,28 @@ export default function InvoiceClient({
           + Tambah invoice
         </button>
       </div>
+
+      <StripAngka
+        kartu={[
+          { label: "Total invoice", nilai: String(daftar.length) },
+          {
+            label: "Belum lunas",
+            nilai: String(ringkasanPiutang.belumLunas),
+            aksen: "text-cyan-300",
+          },
+          {
+            label: "Piutang terbuka",
+            nilai: formatRupiah(ringkasanPiutang.piutang),
+            aksen: "text-cyan-300",
+          },
+          {
+            label: "Jatuh tempo ≤ 7 hari",
+            nilai: String(ringkasanPiutang.segera),
+            aksen:
+              ringkasanPiutang.segera > 0 ? "text-rose-400" : "text-slate-100",
+          },
+        ]}
+      />
 
       {pelanggan.length === 0 && (
         <div className="peringatan">

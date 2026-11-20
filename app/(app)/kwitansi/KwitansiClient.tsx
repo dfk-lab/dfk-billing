@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import StripAngka from "@/components/StripAngka";
 import { formatRupiah, formatTanggal, LABEL_METODE } from "@/lib/format";
 
 export type KwitansiRingkas = {
@@ -35,6 +36,28 @@ export default function KwitansiClient({
     jenis: "ok" | "gagal";
     teks: string;
   } | null>(null);
+
+  const nilaiKwitansi = useMemo(() => {
+    const kini = new Date();
+    const bulanKini = kini.getFullYear() * 12 + kini.getMonth();
+    let bulanIni = 0;
+    let tahunIni = 0;
+    let total = 0;
+    for (const k of daftar) {
+      const d = new Date(k.tanggal);
+      total += k.jumlah;
+      if (d.getFullYear() === kini.getFullYear()) {
+        tahunIni += k.jumlah;
+        if (d.getFullYear() * 12 + d.getMonth() === bulanKini)
+          bulanIni += k.jumlah;
+      }
+    }
+    return {
+      bulanIni,
+      tahunIni,
+      rataRata: daftar.length > 0 ? Math.round(total / daftar.length) : 0,
+    };
+  }, [daftar]);
 
   async function hapus(k: KwitansiRingkas) {
     if (
@@ -78,6 +101,26 @@ export default function KwitansiClient({
           Bukti pembayaran — otomatis dibuat setiap kali pembayaran dicatat.
         </p>
       </div>
+
+      <StripAngka
+        kartu={[
+          { label: "Total kwitansi", nilai: String(daftar.length) },
+          {
+            label: "Nilai bulan ini",
+            nilai: formatRupiah(nilaiKwitansi.bulanIni),
+            aksen: "text-emerald-300",
+          },
+          {
+            label: "Nilai tahun ini",
+            nilai: formatRupiah(nilaiKwitansi.tahunIni),
+            aksen: "text-emerald-300",
+          },
+          {
+            label: "Rata-rata nilai",
+            nilai: formatRupiah(nilaiKwitansi.rataRata),
+          },
+        ]}
+      />
 
       {notifikasi && (
         <div

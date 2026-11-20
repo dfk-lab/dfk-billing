@@ -21,9 +21,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
+      data-tema="gelap"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#090d16] font-sans text-slate-200">
+      <body className="min-h-full font-sans">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{var t=localStorage.getItem("dfk-tema");document.documentElement.dataset.tema=t==="terang"?"terang":"gelap"}catch(e){document.documentElement.dataset.tema="gelap"}',
+          }}
+        />
         {children}
       </body>
     </html>

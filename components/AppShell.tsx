@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import TemaToggle from "@/components/TemaToggle";
 
 function Ikon({
   ukuran = 18,
@@ -206,13 +207,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="border-t border-white/10 p-3">
-          <button
-            onClick={keluar}
-            className="nav-side w-full text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
-          >
-            <Ikon>{ikonKeluar}</Ikon>
-            <span>Keluar</span>
-          </button>
+          <div className="space-y-1">
+            <TemaToggle
+              ukuran={18}
+              className="nav-side w-full"
+              denganLabel
+            />
+            <button
+              onClick={keluar}
+              className="nav-side w-full text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+            >
+              <Ikon>{ikonKeluar}</Ikon>
+              <span>Keluar</span>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -227,6 +235,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <div className="ml-auto flex items-center gap-1.5">
+          <TemaToggle />
           <Link href="/cari" className="tombol-mini" aria-label="Cari">
             <Ikon ukuran={15}>{ikonCari}</Ikon>
           </Link>
@@ -263,7 +272,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setLembar(false)}
           />
-          <div className="sheet absolute inset-x-0 bottom-0 border-t border-white/10 bg-[#0d1322]/95 shadow-[0_-20px_60px_-20px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          <div className="sheet sheet-kaca absolute inset-x-0 bottom-0 border-t border-white/10">
             <div className="flex justify-center pt-3">
               <span className="h-1 w-10 rounded-full bg-white/20" />
             </div>
@@ -283,6 +292,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <span>{item.label}</span>
                 </Link>
               ))}
+              <TemaToggle
+                ukuran={18}
+                className="nav-side"
+                denganLabel
+              />
             </nav>
             <div className="border-t border-white/10 p-3">
               <button

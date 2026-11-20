@@ -51,7 +51,7 @@ export default async function CetakInvoicePage({
   const bankAda = s.namaBank || s.noRekening || s.atasNamaRekening;
 
   return (
-    <div className="kertas-wrap min-h-screen overflow-x-auto bg-zinc-100 p-6">
+    <div data-tema="gelap" className="kertas-wrap min-h-screen overflow-x-auto bg-zinc-100 p-6">
       <TombolCetak kembaliKe={`/invoice/${invoice.id}`} />
       <div className="kertas mx-auto w-[210mm] rounded-lg bg-white p-[15mm] text-[11pt] leading-relaxed text-zinc-900 shadow-lg">
         {/* Header */}

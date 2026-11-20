@@ -115,37 +115,6 @@ export default async function DashboardPage() {
   }
   const maksGrafik = Math.max(...grafik.map((g) => g.jumlah), 1);
 
-  const stats = [
-    {
-      label: "Piutang berjalan",
-      nilai: formatRupiah(piutang),
-      href: "/invoice",
-      catatan: "Invoice terkirim yang belum lunas",
-      warna: "text-cyan-300",
-    },
-    {
-      label: "Pembayaran bulan ini",
-      nilai: formatRupiah(pembayaranBulanIni._sum.jumlah ?? 0),
-      href: "/kwitansi",
-      catatan: "Total masuk bulan berjalan",
-      warna: "text-emerald-300",
-    },
-    {
-      label: "Layanan aktif",
-      nilai: String(layananAktif),
-      href: "/layanan",
-      catatan: "Langganan sedang berjalan",
-      warna: "text-slate-100",
-    },
-    {
-      label: "Perlu ditindaklanjuti",
-      nilai: String(ditindaklanjuti),
-      href: "/invoice",
-      catatan: "Jatuh tempo ≤ 7 hari atau lewat",
-      warna: ditindaklanjuti > 0 ? "text-rose-400" : "text-slate-100",
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="muncul">
@@ -158,31 +127,88 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Kartu statistik */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s, i) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className="kaca muncul p-5 transition-colors hover:border-cyan-400/30"
-            style={{ animationDelay: `${i * 60}ms` }}
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-              {s.label}
-            </p>
-            <p
-              className={`angka mt-2 truncate text-xl font-bold sm:text-2xl ${s.warna}`}
-            >
-              {s.nilai}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">{s.catatan}</p>
-          </Link>
-        ))}
-      </div>
+      {/* Bento grid */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+        {/* Hero: piutang berjalan */}
+        <Link
+          href="/invoice"
+          className="kaca muncul col-span-2 overflow-hidden bg-gradient-to-br from-cyan-500/15 via-white/[0.03] to-transparent p-5 transition-colors hover:border-cyan-400/40 sm:p-6 md:col-span-2"
+          style={{ animationDelay: "0ms" }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Piutang berjalan
+          </p>
+          <p className="angka mt-3 truncate text-3xl font-bold text-cyan-300 sm:text-4xl">
+            {formatRupiah(piutang)}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Invoice terkirim yang belum lunas
+          </p>
+          <span className="mt-4 inline-block text-xs font-medium text-cyan-400">
+            Kelola invoice →
+          </span>
+        </Link>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Pembayaran bulan ini */}
+        <Link
+          href="/kwitansi"
+          className="kaca muncul col-span-2 p-5 transition-colors hover:border-emerald-400/30 sm:p-6 md:col-span-2"
+          style={{ animationDelay: "60ms" }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Pembayaran bulan ini
+          </p>
+          <p className="angka mt-3 truncate text-2xl font-bold text-emerald-300 sm:text-3xl">
+            {formatRupiah(pembayaranBulanIni._sum.jumlah ?? 0)}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Total masuk bulan berjalan
+          </p>
+        </Link>
+
+        {/* Layanan aktif */}
+        <Link
+          href="/layanan"
+          className="kaca muncul col-span-1 p-4 transition-colors hover:border-white/30 sm:p-5 md:col-span-1"
+          style={{ animationDelay: "120ms" }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Layanan aktif
+          </p>
+          <p className="angka mt-2 truncate text-2xl font-bold text-slate-100 sm:text-3xl">
+            {layananAktif}
+          </p>
+          <p className="mt-2 hidden text-xs text-slate-500 sm:block">
+            Langganan berjalan
+          </p>
+        </Link>
+
+        {/* Perlu ditindaklanjuti */}
+        <Link
+          href="/invoice"
+          className="kaca muncul col-span-1 p-4 transition-colors hover:border-rose-400/30 sm:p-5 md:col-span-1"
+          style={{ animationDelay: "180ms" }}
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Perlu ditindak
+          </p>
+          <p
+            className={`angka mt-2 truncate text-2xl font-bold sm:text-3xl ${
+              ditindaklanjuti > 0 ? "text-rose-400" : "text-slate-100"
+            }`}
+          >
+            {ditindaklanjuti}
+          </p>
+          <p className="mt-2 hidden text-xs text-slate-500 sm:block">
+            Tempo ≤ 7 hari
+          </p>
+        </Link>
+
         {/* Grafik 6 bulan */}
-        <div className="kaca muncul p-6 lg:col-span-3" style={{ animationDelay: "120ms" }}>
+        <div
+          className="kaca muncul col-span-2 p-5 sm:p-6 md:col-span-4"
+          style={{ animationDelay: "240ms" }}
+        >
           <h2 className="text-sm font-semibold text-slate-100">
             Pembayaran 6 bulan terakhir
           </h2>
@@ -212,7 +238,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Perlu diperpanjang */}
-        <div className="kaca muncul p-6 lg:col-span-2" style={{ animationDelay: "180ms" }}>
+        <div
+          className="kaca muncul col-span-2 p-5 sm:p-6 md:col-span-2"
+          style={{ animationDelay: "300ms" }}
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-100">Perlu diperpanjang</h2>
             <Link
@@ -260,13 +289,14 @@ export default async function DashboardPage() {
             </ul>
           )}
         </div>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Jatuh tempo dekat */}
-        <div className="kaca muncul p-6 lg:col-span-2" style={{ animationDelay: "240ms" }}>
+        {/* Invoice jatuh tempo dekat */}
+        <div
+          className="kaca muncul col-span-2 p-5 sm:p-6 md:col-span-2"
+          style={{ animationDelay: "360ms" }}
+        >
           <h2 className="text-sm font-semibold text-slate-100">
-            Invoice jatuh tempo dekat
+            Jatuh tempo dekat
           </h2>
           {daftarJatuhTempo.length === 0 ? (
             <p className="mt-4 text-sm text-slate-400">
@@ -303,7 +333,10 @@ export default async function DashboardPage() {
         </div>
 
         {/* Pembayaran terbaru */}
-        <div className="kaca muncul p-6 lg:col-span-3" style={{ animationDelay: "300ms" }}>
+        <div
+          className="kaca muncul col-span-2 p-5 sm:p-6 md:col-span-4"
+          style={{ animationDelay: "420ms" }}
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-100">Pembayaran terbaru</h2>
             <Link
@@ -318,7 +351,7 @@ export default async function DashboardPage() {
               Belum ada pembayaran tercatat.
             </p>
           ) : (
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-x-6">
               {pembayaranTerbaru.map((p) => (
                 <li key={p.id} className="flex items-start justify-between gap-2 text-sm">
                   <div>

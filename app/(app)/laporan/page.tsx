@@ -120,159 +120,196 @@ export default async function LaporanPage() {
         </p>
       </div>
 
-      {/* Ringkasan tahun */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="kaca p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Invoice {tahunSekarang}
-          </p>
-          <p className="angka mt-2 text-2xl font-bold text-slate-100">{invoiceTahun._count}</p>
-        </div>
-        <div className="kaca p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Pembayaran masuk {tahunSekarang}
-          </p>
-          <p className="angka mt-2 text-2xl font-bold text-emerald-300">
-            {formatRupiah(pembayaranTahun._sum.jumlah ?? 0)}
-          </p>
-        </div>
-        <div className="kaca p-5">
+      {/* Bento grid */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+        {/* Hero: total piutang */}
+        <div className="kaca col-span-2 overflow-hidden bg-gradient-to-br from-cyan-500/15 via-white/[0.03] to-transparent p-5 sm:p-6 md:col-span-2">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Total piutang
           </p>
-          <p className="angka mt-2 text-2xl font-bold text-cyan-300">
+          <p className="angka mt-3 truncate text-3xl font-bold text-cyan-300 sm:text-4xl">
             {formatRupiah(totalPiutang)}
           </p>
+          <p className="mt-2 text-xs text-slate-500">
+            {detail.length} invoice belum lunas
+          </p>
         </div>
-        <div className="kaca p-5">
+
+        {/* Pembayaran masuk tahun */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-2">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Invoice belum lunas
+            Masuk tahun {tahunSekarang}
           </p>
-          <p className="angka mt-2 text-2xl font-bold text-slate-100">{detail.length}</p>
+          <p className="angka mt-3 truncate text-2xl font-bold text-emerald-300 sm:text-3xl">
+            {formatRupiah(pembayaranTahun._sum.jumlah ?? 0)}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Total pembayaran diterima
+          </p>
         </div>
-      </div>
 
-      {/* Grafik 12 bulan */}
-      <div className="kaca p-6">
-        <h2 className="text-sm font-semibold">Pembayaran 12 bulan terakhir</h2>
-        <div className="mt-6 flex h-44 items-end gap-1 sm:gap-1.5">
-          {grafik.map((g) => (
-            <div
-              key={`${g.tahun}-${g.label}`}
-              className="flex h-full flex-1 flex-col items-center"
-            >
-              <div className="flex w-full flex-1 items-end">
-                <div
-                  className={`w-full rounded-t ${g.jumlah > 0 ? "bg-gradient-to-t from-cyan-600/80 to-cyan-300 shadow-[0_0_14px_-2px_rgba(34,211,238,0.5)]" : "bg-white/10"}`}
-                  style={{
-                    height: `${Math.max((g.jumlah / maks) * 100, g.jumlah > 0 ? 6 : 2)}%`,
-                  }}
-                  title={formatRupiah(g.jumlah)}
-                />
+        {/* Invoice tahun */}
+        <div className="kaca col-span-1 p-4 sm:p-5 md:col-span-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Invoice
+          </p>
+          <p className="angka mt-2 truncate text-2xl font-bold text-slate-100 sm:text-3xl">
+            {invoiceTahun._count}
+          </p>
+          <p className="mt-2 hidden text-xs text-slate-500 sm:block">
+            Diterbitkan tahun ini
+          </p>
+        </div>
+
+        {/* Belum lunas */}
+        <div className="kaca col-span-1 p-4 sm:p-5 md:col-span-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Belum lunas
+          </p>
+          <p className="angka mt-2 truncate text-2xl font-bold text-slate-100 sm:text-3xl">
+            {detail.length}
+          </p>
+          <p className="mt-2 hidden text-xs text-slate-500 sm:block">
+            Invoice terbuka
+          </p>
+        </div>
+
+        {/* Grafik 12 bulan */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-4">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Pembayaran 12 bulan terakhir
+          </h2>
+          <div className="mt-6 flex h-44 items-end gap-1 sm:gap-1.5">
+            {grafik.map((g) => (
+              <div
+                key={`${g.tahun}-${g.label}`}
+                className="flex h-full flex-1 flex-col items-center"
+              >
+                <div className="flex w-full flex-1 items-end">
+                  <div
+                    className={`w-full rounded-t ${g.jumlah > 0 ? "bg-gradient-to-t from-cyan-600/80 to-cyan-300 shadow-[0_0_14px_-2px_rgba(34,211,238,0.5)]" : "bg-white/10"}`}
+                    style={{
+                      height: `${Math.max((g.jumlah / maks) * 100, g.jumlah > 0 ? 6 : 2)}%`,
+                    }}
+                    title={formatRupiah(g.jumlah)}
+                  />
+                </div>
+                <p className="mt-1 hidden text-[10px] text-slate-500 md:block">
+                  {g.jumlah > 0 ? formatRpPendek(g.jumlah) : ""}
+                </p>
+                <p className="text-[10px] text-slate-500 sm:text-xs">{g.label}</p>
               </div>
-              <p className="mt-1 hidden text-[10px] text-slate-500 md:block">
-                {g.jumlah > 0 ? formatRpPendek(g.jumlah) : ""}
-              </p>
-              <p className="text-[10px] text-slate-500 sm:text-xs">{g.label}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Umur piutang */}
-      <div className="kaca">
-        <div className="border-b border-white/10 px-6 py-4">
+        {/* Umur piutang */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-2">
           <h2 className="text-sm font-semibold text-slate-100">Umur piutang</h2>
-        </div>
-        {detail.length === 0 ? (
-          <p className="px-6 py-8 text-center text-sm text-slate-500">
-            Tidak ada piutang — semua invoice terkirim sudah lunas.
-          </p>
-        ) : (
-          <>
-            {/* Ringkasan bucket */}
-            <div className="grid grid-cols-2 gap-3 px-6 py-4 sm:grid-cols-5">
+          {totalPiutang === 0 && detail.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-400">
+              Tidak ada piutang — semua invoice terkirim sudah lunas.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-2">
               {perBuket.map((b) => (
-                <div
+                <li
                   key={b.label}
                   className={`rounded-lg px-3 py-2 ${b.jumlah > 0 ? b.cls : "bg-white/[0.04] text-slate-600"}`}
                 >
                   <p className="text-xs font-medium">{b.label}</p>
-                  <p className="mt-1 text-sm font-bold">
+                  <p className="angka mt-0.5 text-sm font-bold">
                     {formatRupiah(b.total)}
                   </p>
                   <p className="text-[10px]">{b.jumlah} invoice</p>
-                </div>
-              ))}
-            </div>
-            {/* Tabel detail */}
-            <table className="tabel hidden md:table">
-              <thead>
-                <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-6 py-3 font-medium">Invoice</th>
-                  <th className="px-6 py-3 font-medium">Pelanggan</th>
-                  <th className="px-6 py-3 font-medium">Jatuh tempo</th>
-                  <th className="px-6 py-3 font-medium text-right">Keterlambatan</th>
-                  <th className="px-6 py-3 font-medium text-right">Sisa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {detail.map((d) => (
-                  <tr key={d.nomor} className="border-b border-white/10 last:border-0">
-                    <td className="px-6 py-3 font-medium">{d.nomor}</td>
-                    <td className="px-6 py-3 text-slate-400">{d.pelanggan}</td>
-                    <td className="px-6 py-3 text-slate-400">
-                      {d.jatuhTempo ? formatTanggal(d.jatuhTempo) : "—"}
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      {d.terlambatHari > 0 ? (
-                        <span className="badge badge-rose">
-                          {d.terlambatHari} hari
-                        </span>
-                      ) : (
-                        <span className="text-xs text-slate-600">Belum jatuh tempo</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-3 text-right font-medium">
-                      {formatRupiah(d.sisa)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Kartu mobile */}
-            <ul className="divide-y divide-white/10 px-4 md:hidden">
-              {detail.map((d) => (
-                <li key={d.nomor} className="flex items-start justify-between gap-2 py-3 text-sm">
-                  <div>
-                    <p className="font-medium">{d.nomor}</p>
-                    <p className="text-xs text-slate-500">
-                      {d.pelanggan}
-                      {d.jatuhTempo ? ` · ${formatTanggal(d.jatuhTempo)}` : ""}
-                    </p>
-                    {d.terlambatHari > 0 && (
-                      <span className="badge badge-rose mt-1">
-                        Terlambat {d.terlambatHari} hari
-                      </span>
-                    )}
-                  </div>
-                  <p className="whitespace-nowrap font-medium">{formatRupiah(d.sisa)}</p>
                 </li>
               ))}
             </ul>
-          </>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Cadangan */}
-      <div className="kaca p-6">
-        <h2 className="text-sm font-semibold text-slate-100">Cadangan data</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Unduh seluruh data (pengaturan, pelanggan, layanan, invoice, pembayaran,
-          kwitansi) sebagai file JSON, atau pulihkan dari cadangan sebelumnya.
-          Memulihkan akan <b>mengganti seluruh data saat ini</b>.
-        </p>
-        <CadanganKontrol />
+        {/* Rincian piutang */}
+        <div className="kaca col-span-2 md:col-span-6">
+          <div className="border-b border-white/10 px-5 py-4 sm:px-6">
+            <h2 className="text-sm font-semibold text-slate-100">
+              Rincian piutang
+            </h2>
+          </div>
+          {detail.length === 0 ? (
+            <p className="px-6 py-8 text-center text-sm text-slate-500">
+              Tidak ada piutang — semua invoice terkirim sudah lunas.
+            </p>
+          ) : (
+            <>
+              {/* Tabel detail */}
+              <table className="tabel hidden md:table">
+                <thead>
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-slate-500">
+                    <th className="px-6 py-3 font-medium">Invoice</th>
+                    <th className="px-6 py-3 font-medium">Pelanggan</th>
+                    <th className="px-6 py-3 font-medium">Jatuh tempo</th>
+                    <th className="px-6 py-3 font-medium text-right">Keterlambatan</th>
+                    <th className="px-6 py-3 font-medium text-right">Sisa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detail.map((d) => (
+                    <tr key={d.nomor} className="border-b border-white/10 last:border-0">
+                      <td className="px-6 py-3 font-medium">{d.nomor}</td>
+                      <td className="px-6 py-3 text-slate-400">{d.pelanggan}</td>
+                      <td className="px-6 py-3 text-slate-400">
+                        {d.jatuhTempo ? formatTanggal(d.jatuhTempo) : "—"}
+                      </td>
+                      <td className="px-6 py-3 text-right">
+                        {d.terlambatHari > 0 ? (
+                          <span className="badge badge-rose">
+                            {d.terlambatHari} hari
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-600">Belum jatuh tempo</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-right font-medium">
+                        {formatRupiah(d.sisa)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* Kartu mobile */}
+              <ul className="divide-y divide-white/10 px-4 md:hidden">
+                {detail.map((d) => (
+                  <li key={d.nomor} className="flex items-start justify-between gap-2 py-3 text-sm">
+                    <div>
+                      <p className="font-medium">{d.nomor}</p>
+                      <p className="text-xs text-slate-500">
+                        {d.pelanggan}
+                        {d.jatuhTempo ? ` · ${formatTanggal(d.jatuhTempo)}` : ""}
+                      </p>
+                      {d.terlambatHari > 0 && (
+                        <span className="badge badge-rose mt-1">
+                          Terlambat {d.terlambatHari} hari
+                        </span>
+                      )}
+                    </div>
+                    <p className="whitespace-nowrap font-medium">{formatRupiah(d.sisa)}</p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+
+        {/* Cadangan */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-6">
+          <h2 className="text-sm font-semibold text-slate-100">Cadangan data</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Unduh seluruh data (pengaturan, pelanggan, layanan, invoice, pembayaran,
+            kwitansi) sebagai file JSON, atau pulihkan dari cadangan sebelumnya.
+            Memulihkan akan <b>mengganti seluruh data saat ini</b>.
+          </p>
+          <CadanganKontrol />
+        </div>
       </div>
     </div>
   );

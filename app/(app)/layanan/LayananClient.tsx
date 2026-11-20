@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import StripAngka from "@/components/StripAngka";
 import {
   formatRupiah,
   formatTanggal,
@@ -104,6 +105,24 @@ export default function LayananClient({
     teks: string;
   } | null>(null);
 
+  const ringkasLayanan = useMemo(() => {
+    let aktif = 0;
+    let berakhir = 0;
+    let auto = 0;
+    let perBulan = 0;
+    for (const l of daftar) {
+      if (l.status === "AKTIF") {
+        aktif += 1;
+        if (l.perpanjangOtomatis && l.periode !== "SEKALI") auto += 1;
+        if (l.periode === "BULANAN") perBulan += l.harga;
+        else if (l.periode === "TAHUNAN") perBulan += Math.round(l.harga / 12);
+      } else {
+        berakhir += 1;
+      }
+    }
+    return { aktif, berakhir, auto, perBulan };
+  }, [daftar]);
+
   function bukaBaru() {
     setPilihan(null);
     setForm(kosongForm(pelanggan[0] ? String(pelanggan[0].id) : ""));
@@ -197,6 +216,29 @@ export default function LayananClient({
           + Tambah layanan
         </button>
       </div>
+
+      <StripAngka
+        kartu={[
+          {
+            label: "Layanan aktif",
+            nilai: String(ringkasLayanan.aktif),
+            aksen: "text-cyan-300",
+          },
+          {
+            label: "Berakhir",
+            nilai: String(ringkasLayanan.berakhir),
+          },
+          {
+            label: "Auto perpanjang",
+            nilai: String(ringkasLayanan.auto),
+          },
+          {
+            label: "Nilai / bulan",
+            nilai: formatRupiah(ringkasLayanan.perBulan),
+            aksen: "text-emerald-300",
+          },
+        ]}
+      />
 
       {pelanggan.length === 0 && (
         <div className="peringatan">
