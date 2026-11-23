@@ -237,7 +237,7 @@ export default function PengaturanPage() {
                     className="mt-1 block text-sm"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    PNG/JPG, maksimal 2 MB. Tampil di kepala invoice dan kwitansi.
+                    PNG/JPG, maksimal 2 MB. Tampil di sidebar, halaman login, tab browser, dan kepala invoice/kwitansi.
                   </p>
                 </>
               )}

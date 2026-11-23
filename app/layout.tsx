@@ -15,6 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "DFK Billing",
   description: "Aplikasi invoice dan kwitansi tagihan",
+  icons: { icon: "/api/logo" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

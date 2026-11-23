@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import TemaToggle from "@/components/TemaToggle";
+import LogoUsaha from "./LogoUsaha";
 
 function Ikon({
   ukuran = 18,
@@ -181,9 +182,7 @@ export default function AppShell({
       {/* Sidebar kiri — layar sedang ke atas */}
       <aside className="sidebar no-print fixed inset-y-0 left-0 z-40 hidden w-64 flex-col md:flex">
         <Link href="/" className="flex items-center gap-3 px-5 py-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-300 to-cyan-600 text-base font-bold text-[#041019] shadow-[0_0_18px_-4px_rgba(34,211,238,0.7)]">
-            D
-          </span>
+          <LogoUsaha size={36} className="shrink-0 drop-shadow-[0_0_10px_rgba(34,211,238,0.45)]" />
           <span>
             <span className="block text-sm font-semibold tracking-tight text-slate-100">
               DFK Billing
@@ -246,9 +245,7 @@ export default function AppShell({
       {/* Bar atas — mobile */}
       <header className="navbar no-print sticky top-0 z-40 flex h-14 items-center gap-3 px-4 md:hidden">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-300 to-cyan-600 text-sm font-bold text-[#041019] shadow-[0_0_18px_-4px_rgba(34,211,238,0.7)]">
-            D
-          </span>
+          <LogoUsaha size={32} className="shrink-0 drop-shadow-[0_0_10px_rgba(34,211,238,0.45)]" />
           <span className="text-sm font-semibold tracking-tight text-slate-100">
             DFK Billing
           </span>
