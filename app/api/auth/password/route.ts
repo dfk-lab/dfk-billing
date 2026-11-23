@@ -15,9 +15,9 @@ export async function PUT(request: Request) {
     typeof body.passwordLama === "string" ? body.passwordLama : "";
   const passwordBaru =
     typeof body.passwordBaru === "string" ? body.passwordBaru : "";
-  if (!passwordLama || passwordBaru.length < 6) {
+  if (!passwordLama || passwordBaru.length < 8) {
     return NextResponse.json(
-      { error: "Password baru minimal 6 karakter." },
+      { error: "Password baru minimal 8 karakter." },
       { status: 400 }
     );
   }

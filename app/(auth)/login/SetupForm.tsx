@@ -56,13 +56,13 @@ export default function SetupForm() {
       </div>
       <div>
         <label className="label" htmlFor="password">
-          Password (minimal 6 karakter)
+          Password (minimal 8 karakter)
         </label>
         <input
           id="password"
           type="password"
           required
-          minLength={6}
+          minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className={inputCls}

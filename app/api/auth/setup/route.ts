@@ -6,9 +6,9 @@ export async function POST(request: Request) {
   const body = (await request.json()) as { nama?: unknown; password?: unknown };
   const nama = typeof body.nama === "string" ? body.nama.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
-  if (!nama || password.length < 6) {
+  if (!nama || password.length < 8) {
     return NextResponse.json(
-      { error: "Nama wajib diisi dan password minimal 6 karakter." },
+      { error: "Nama wajib diisi dan password minimal 8 karakter." },
       { status: 400 }
     );
   }

@@ -9,15 +9,20 @@ export async function POST(request: Request) {
   if (!password) {
     return NextResponse.json({ error: "Password wajib diisi." }, { status: 400 });
   }
+  const aktif = await prisma.pengguna.findMany({ where: { aktif: true } });
   const pengguna = nama
-    ? await prisma.pengguna.findFirst({
-        where: { nama, aktif: true },
-      })
-    : await prisma.pengguna.findFirst({ where: { aktif: true } });
+    ? aktif.find((u) => u.nama.toLowerCase() === nama.toLowerCase())
+    : aktif.length === 1
+      ? aktif[0]
+      : undefined;
   if (!pengguna) {
     return NextResponse.json(
-      { error: nama ? "Pengguna tidak ditemukan atau nonaktif." : "Password salah." },
-      { status: 401 }
+      {
+        error: nama
+          ? "Pengguna tidak ditemukan atau nonaktif."
+          : "Ada lebih dari satu pengguna. Isi kolom nama pengguna.",
+      },
+      { status: nama ? 401 : 400 }
     );
   }
   if (!cocokPassword(password, pengguna.passwordHash)) {

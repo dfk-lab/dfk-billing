@@ -29,9 +29,9 @@ export async function PATCH(request: Request, { params }: Konteks) {
     data.nama = body.nama.trim();
   }
   if (typeof body.password === "string" && body.password) {
-    if (body.password.length < 6) {
+    if (body.password.length < 8) {
       return NextResponse.json(
-        { error: "Password minimal 6 karakter." },
+        { error: "Password minimal 8 karakter." },
         { status: 400 }
       );
     }

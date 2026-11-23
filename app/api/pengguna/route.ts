@@ -41,9 +41,9 @@ export async function POST(request: Request) {
   const nama = typeof body.nama === "string" ? body.nama.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
   const role = body.role === "PETUGAS" ? "PETUGAS" : "ADMIN";
-  if (!nama || password.length < 6) {
+  if (!nama || password.length < 8) {
     return NextResponse.json(
-      { error: "Nama wajib diisi dan password minimal 6 karakter." },
+      { error: "Nama wajib diisi dan password minimal 8 karakter." },
       { status: 400 }
     );
   }

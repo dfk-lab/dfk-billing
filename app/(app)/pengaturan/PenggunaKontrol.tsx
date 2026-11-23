@@ -177,7 +177,7 @@ export default function PenggunaKontrol() {
             />
           </div>
           <div>
-            <label className={labelCls}>Password (min. 6)</label>
+            <label className={labelCls}>Password (min. 8)</label>
             <input
               type="password"
               value={pwBaru}
