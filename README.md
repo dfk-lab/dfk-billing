@@ -62,6 +62,7 @@ docker run -d --name dfk-billing --restart unless-stopped \
   -e DATABASE_URL=file:/app/data/dfk.db \
   -e AUTH_SECRET="ganti-dengan-string-acak-panjang" \
   -e CADANGAN_DIR=/app/data/cadangan-otomatis \
+  -e UPLOAD_DIR=/app/data/upload \
   -v "$(pwd)/data:/app/data" \
   dfk-billing
 ```
@@ -96,6 +97,7 @@ Skema database diterapkan otomatis saat kontainer menyala (`prisma db push` — 
 | `DATABASE_URL` | ya | Lokasi file SQLite, contoh Docker: `file:/app/data/dfk.db` |
 | `AUTH_SECRET` | ya | Kunci tanda-tangan JWT sesi login — gunakan string acak panjang |
 | `CADANGAN_DIR` | tidak | Folder cadangan otomatis (default `./cadangan-otomatis`) |
+| `UPLOAD_DIR` | tidak | Folder berkas unggahan logo/tanda tangan (default `./upload`; Docker: `/app/data/upload`) |
 
 ## Struktur penting
 

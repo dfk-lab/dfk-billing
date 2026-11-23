@@ -10,5 +10,6 @@ services:
       DATABASE_URL: file:/app/data/dfk.db
       AUTH_SECRET: ${AUTH_SECRET:-SILAKAN-GANTI-KUNCI-INI-DENGAN-STRING-ACAK-PANJANG}
       CADANGAN_DIR: /app/data/cadangan-otomatis
+      UPLOAD_DIR: /app/data/upload
     volumes:
       - ./data:/app/data

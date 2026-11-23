@@ -6,6 +6,7 @@ import {
   LABEL_METODE,
 } from "@/lib/format";
 import { terbilangRupiah } from "@/lib/terbilang";
+import { bacaBerkas } from "@/lib/upload";
 
 const M = 42.5; // 15mm
 const LEBAR = 595.28;
@@ -63,9 +64,13 @@ type KwitansiPdf = {
   };
 };
 
-function dataUrlKeBuffer(dataUrl: string): Buffer | null {
-  const m = /^data:image\/[a-zA-Z+]+;base64,(.+)$/.exec(dataUrl.trim());
-  return m ? Buffer.from(m[1], "base64") : null;
+function dataUrlKeBuffer(nilai: string): Buffer | null {
+  const m = /^data:image\/[a-zA-Z+]+;base64,(.+)$/.exec(nilai.trim());
+  if (m) return Buffer.from(m[1], "base64");
+  if (nilai.startsWith("/api/berkas/")) {
+    return bacaBerkas(nilai.slice("/api/berkas/".length));
+  }
+  return null;
 }
 
 type Doc = PDFKit.PDFDocument;

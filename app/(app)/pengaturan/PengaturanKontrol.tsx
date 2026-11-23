@@ -90,15 +90,30 @@ export default function PengaturanPage() {
     setForm((f) => (f ? { ...f, [kunci]: nilai } : f));
   }
 
-  function pilihGambar(file: File, muat: (dataUrl: string) => void) {
+  async function unggahGambar(
+    file: File,
+    jenis: "logo" | "ttd",
+    muat: (url: string) => void
+  ) {
     if (file.size > UKURAN_GAMBAR_MAKS) {
       setStatus("gagal");
       setPesan("Ukuran gambar maksimal 2 MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => muat(reader.result as string);
-    reader.readAsDataURL(file);
+    const fd = new FormData();
+    fd.append("berkas", file);
+    fd.append("jenis", jenis);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      setStatus("gagal");
+      setPesan(
+        (await res.json().catch(() => null))?.error ||
+          "Gagal mengunggah berkas."
+      );
+      return;
+    }
+    const data = await res.json();
+    muat(`/api/berkas/${data.nama}`);
   }
 
   async function simpan(e: React.FormEvent) {
@@ -212,7 +227,7 @@ export default function PengaturanPage() {
                     type="button"
                     onClick={() => {
                       setLogoPratinjau(null);
-                      ubah("logo", null);
+                      ubah("logo", "");
                       if (logoRef.current) logoRef.current.value = "";
                     }}
                     className="text-sm text-rose-400 hover:underline"
@@ -222,6 +237,17 @@ export default function PengaturanPage() {
                 </div>
               ) : (
                 <>
+                  <div className="mt-2 flex items-center gap-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/api/logo"
+                      alt="Logo default"
+                      className="h-16 w-16 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
+                    />
+                    <span className="text-xs text-slate-500">
+                      Belum ada logo — memakai logo default.
+                    </span>
+                  </div>
                   <input
                     ref={logoRef}
                     type="file"
@@ -229,15 +255,18 @@ export default function PengaturanPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file)
-                        pilihGambar(file, (dataUrl) => {
-                          setLogoPratinjau(dataUrl);
-                          ubah("logo", dataUrl);
+                        unggahGambar(file, "logo", (url) => {
+                          setLogoPratinjau(url);
+                          ubah("logo", url);
+                          if (logoRef.current) logoRef.current.value = "";
                         });
                     }}
                     className="mt-1 block text-sm"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    PNG/JPG, maksimal 2 MB. Tampil di sidebar, halaman login, tab browser, dan kepala invoice/kwitansi.
+                    PNG/JPG/WEBP, maksimal 2 MB. Nama berkas otomatis diganti
+                    dengan kode unik. Tampil di sidebar, halaman login, tab
+                    browser, dan kepala invoice/kwitansi.
                   </p>
                 </>
               )}
@@ -364,7 +393,7 @@ export default function PengaturanPage() {
                     type="button"
                     onClick={() => {
                       setTtdPratinjau(null);
-                      ubah("gambarTandaTangan", null);
+                      ubah("gambarTandaTangan", "");
                       if (ttdRef.current) ttdRef.current.value = "";
                     }}
                     className="text-sm text-rose-400 hover:underline"
@@ -381,9 +410,10 @@ export default function PengaturanPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file)
-                        pilihGambar(file, (dataUrl) => {
-                          setTtdPratinjau(dataUrl);
-                          ubah("gambarTandaTangan", dataUrl);
+                        unggahGambar(file, "ttd", (url) => {
+                          setTtdPratinjau(url);
+                          ubah("gambarTandaTangan", url);
+                          if (ttdRef.current) ttdRef.current.value = "";
                         });
                     }}
                     className="mt-1 block text-sm"

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { hapusBerkasUrl } from "@/lib/upload";
 
 const stringFields = [
   "namaUsaha",
@@ -81,6 +82,17 @@ export async function PUT(request: Request) {
   const body = (await request.json()) as Record<string, unknown>;
   const data = ambilData(body);
   const existing = await prisma.setting.findFirst();
+  const lama = existing as unknown as Record<string, unknown> | null;
+  for (const kunci of ["logo", "gambarTandaTangan"]) {
+    const nilaiLama = lama?.[kunci];
+    if (
+      typeof nilaiLama === "string" &&
+      nilaiLama.startsWith("/api/berkas/") &&
+      data[kunci] !== nilaiLama
+    ) {
+      hapusBerkasUrl(nilaiLama);
+    }
+  }
   const setting = existing
     ? await prisma.setting.update({ where: { id: existing.id }, data })
     : await prisma.setting.create({ data });

@@ -52,3 +52,6 @@ next-env.d.ts
 
 # cadangan otomatis
 /cadangan-otomatis/
+
+# berkas unggahan (logo/tanda tangan)
+/upload/

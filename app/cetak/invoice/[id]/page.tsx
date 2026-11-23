@@ -57,10 +57,8 @@ export default async function CetakInvoicePage({
         {/* Header */}
         <div className="flex items-start justify-between gap-6 border-b-2 border-zinc-800 pb-4">
           <div className="flex items-start gap-3">
-            {s.logo && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.logo} alt="Logo" className="h-14 w-14 object-contain" />
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/api/logo" alt="Logo" className="h-14 w-14 object-contain" />
             <div>
               <p className="text-base font-bold">{s.namaUsaha}</p>
               {s.alamat && (

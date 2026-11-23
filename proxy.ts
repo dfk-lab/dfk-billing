@@ -7,6 +7,7 @@ const TERLARANG_PETUGAS = [
   "/pengaturan",
   "/laporan",
   "/api/pengaturan",
+  "/api/upload",
   "/api/otomatis",
   "/api/backup-otomatis",
   "/api/cadangan",
