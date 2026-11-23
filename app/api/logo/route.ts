@@ -30,5 +30,9 @@ export async function GET(request: Request) {
       },
     });
   }
-  return NextResponse.redirect(new URL("/logo-dfk.svg", request.url));
+  // Location relatif agar tetap benar di belakang reverse proxy (CasaOS/HTTPS)
+  return new NextResponse(null, {
+    status: 307,
+    headers: { Location: "/logo-dfk.svg" },
+  });
 }

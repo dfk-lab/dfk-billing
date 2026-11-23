@@ -20,6 +20,7 @@ ENV NODE_ENV=production \
     PORT=4000 \
     HOSTNAME=0.0.0.0
 RUN npm i -g prisma@6.19.3 \
+    && apk add --no-cache su-exec \
     && addgroup -S nodejs \
     && adduser -S nextjs -G nodejs \
     && mkdir -p /app/data \
@@ -28,6 +29,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/prisma/schema.prisma ./prisma/schema.prisma
-USER nextjs
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]
+# Bind mount ./data dari host bisa dimiliki root (CasaOS) — siapkan folder
+# sebagai root, lalu jalankan aplikasi sebagai nextjs.
+CMD ["sh", "-c", "mkdir -p /app/data/upload /app/data/cadangan-otomatis && chown -R nextjs:nodejs /app/data && su-exec nextjs sh -c 'npx prisma db push --skip-generate && exec node server.js'"]
