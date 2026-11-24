@@ -631,6 +631,34 @@ select.masukan option {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Aksen dashboard ===== */
+.batang-grafik {
+  transform-origin: bottom;
+  animation: batang-tumbuh 0.6s cubic-bezier(0.21, 0.8, 0.35, 1) both;
+}
+@keyframes batang-tumbuh {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.daftar-pisah > li + li {
+  border-top: 1px solid var(--garis);
+}
+
+/* Hormati preferensi gerak minimal pengguna */
+@media (prefers-reduced-motion: reduce) {
+  .muncul,
+  .batang-grafik,
+  .sheet,
+  .dot {
+    animation: none;
+  }
+}
+
 /* ===== Cetak A4 (dipertahankan) ===== */
 @page {
   size: A4;
