@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hapusBerkasUrl } from "@/lib/upload";
+import { parseHariPengingat } from "@/lib/otomatis";
 
 const stringFields = [
   "namaUsaha",
@@ -28,6 +29,7 @@ const stringFields = [
   "midtransServerKey",
   "midtransMode",
   "midtransApiUrl",
+  "urlPublik",
 ] as const;
 
 function ambilData(body: Record<string, unknown>) {
@@ -56,6 +58,15 @@ function ambilData(body: Record<string, unknown>) {
     data.waPengingatPelangganAktif =
       body.waPengingatPelangganAktif === true ||
       body.waPengingatPelangganAktif === "true";
+  }
+  if (typeof body.waPengingatHari === "string") {
+    data.waPengingatHari = parseHariPengingat(body.waPengingatHari).join(",");
+  }
+  if (body.waPengingatJam !== undefined) {
+    const n = Number(body.waPengingatJam);
+    if (Number.isInteger(n) && n >= 0 && n <= 23) {
+      data.waPengingatJam = n;
+    }
   }
   if (body.midtransAktif !== undefined) {
     data.midtransAktif =

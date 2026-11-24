@@ -28,30 +28,84 @@ export default async function LaporanPage() {
   );
   const awalTahun = Date.UTC(sekarang.getUTCFullYear(), 0, 1);
 
-  const [invoicesTerbuka, pembayaran12, pembayaranTahun, invoiceTahun] =
-    await Promise.all([
-      prisma.invoice.findMany({
-        where: { status: "TERKIRIM" },
-        include: {
-          items: true,
-          pembayaran: { select: { jumlah: true } },
-          pelanggan: { select: { nama: true } },
-        },
-        orderBy: [{ jatuhTempo: "asc" }],
-      }),
-      prisma.pembayaran.findMany({
-        where: { tanggal: { gte: awal12Bulan } },
-        select: { tanggal: true, jumlah: true },
-      }),
-      prisma.pembayaran.aggregate({
-        where: { tanggal: { gte: new Date(awalTahun) } },
-        _sum: { jumlah: true },
-      }),
-      prisma.invoice.aggregate({
-        where: { tanggal: { gte: new Date(awalTahun) } },
-        _count: true,
-      }),
-    ]);
+  const [
+    invoicesTerbuka,
+    pembayaran12,
+    pembayaranTahun,
+    invoiceTahun,
+    invoiceTahunDetail,
+    pembayaranTahunDetail,
+    pembayaranSemua,
+  ] = await Promise.all([
+    prisma.invoice.findMany({
+      where: { status: "TERKIRIM" },
+      include: {
+        items: true,
+        pembayaran: { select: { jumlah: true } },
+        pelanggan: { select: { nama: true } },
+      },
+      orderBy: [{ jatuhTempo: "asc" }],
+    }),
+    prisma.pembayaran.findMany({
+      where: { tanggal: { gte: awal12Bulan } },
+      select: { tanggal: true, jumlah: true },
+    }),
+    prisma.pembayaran.aggregate({
+      where: { tanggal: { gte: new Date(awalTahun) } },
+      _sum: { jumlah: true },
+    }),
+    prisma.invoice.aggregate({
+      where: { tanggal: { gte: new Date(awalTahun) } },
+      _count: true,
+    }),
+    prisma.invoice.findMany({
+      where: { status: { not: "DRAFT" }, tanggal: { gte: new Date(awalTahun) } },
+      select: { layanan: { select: { nama: true } }, items: true },
+    }),
+    prisma.pembayaran.findMany({
+      where: { tanggal: { gte: new Date(awalTahun) } },
+      select: {
+        jumlah: true,
+        invoice: { select: { pelanggan: { select: { nama: true } } } },
+      },
+    }),
+    prisma.pembayaran.findMany({ select: { tanggal: true, jumlah: true } }),
+  ]);
+
+  // Tagihan per layanan (nilai kotor, invoice non-draft tahun berjalan)
+  const perLayanan = new Map<string, number>();
+  for (const inv of invoiceTahunDetail) {
+    const kunci = inv.layanan?.nama ?? "Tanpa layanan";
+    const nilai = inv.items.reduce((a, it) => a + it.qty * it.hargaSatuan, 0);
+    perLayanan.set(kunci, (perLayanan.get(kunci) ?? 0) + nilai);
+  }
+  const daftarLayanan = [...perLayanan.entries()]
+    .map(([nama, nilai]) => ({ nama, nilai }))
+    .sort((a, b) => b.nilai - a.nilai)
+    .slice(0, 6);
+  const maksLayanan = Math.max(...daftarLayanan.map((d) => d.nilai), 1);
+
+  // Pelanggan teratas (pembayaran tahun berjalan)
+  const perPelanggan = new Map<string, number>();
+  for (const p of pembayaranTahunDetail) {
+    const kunci = p.invoice.pelanggan.nama;
+    perPelanggan.set(kunci, (perPelanggan.get(kunci) ?? 0) + p.jumlah);
+  }
+  const pelangganTeratas = [...perPelanggan.entries()]
+    .map(([nama, jumlah]) => ({ nama, jumlah }))
+    .sort((a, b) => b.jumlah - a.jumlah)
+    .slice(0, 5);
+
+  // Pendapatan per tahun
+  const perTahun = new Map<number, number>();
+  for (const p of pembayaranSemua) {
+    const th = p.tanggal.getUTCFullYear();
+    perTahun.set(th, (perTahun.get(th) ?? 0) + p.jumlah);
+  }
+  const daftarTahun = [...perTahun.entries()]
+    .map(([tahun, jumlah]) => ({ tahun, jumlah }))
+    .sort((a, b) => b.tahun - a.tahun)
+    .slice(0, 6);
 
   // Umur piutang
   const perBuket = BUKET.map((b) => ({ ...b, jumlah: 0, total: 0 }));
@@ -113,11 +167,16 @@ export default async function LaporanPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Laporan</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Ringkasan keuangan tahun berjalan dan analisis piutang.
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Laporan</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Ringkasan keuangan tahun berjalan dan analisis piutang.
+          </p>
+        </div>
+        <a href="/api/laporan/excel" className="tombol-halus">
+          Unduh Excel
+        </a>
       </div>
 
       {/* Bento grid */}
@@ -222,6 +281,99 @@ export default async function LaporanPage() {
                     {formatRupiah(b.total)}
                   </p>
                   <p className="text-[10px]">{b.jumlah} invoice</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Tagihan per layanan */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Tagihan per layanan
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">Tahun {tahunSekarang}</p>
+          {daftarLayanan.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-400">
+              Belum ada invoice terbit tahun ini.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {daftarLayanan.map((l) => (
+                <li key={l.nama}>
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="truncate text-slate-300">{l.nama}</span>
+                    <span className="angka shrink-0 font-medium text-slate-200">
+                      {formatRpPendek(l.nilai)}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-cyan-400"
+                      style={{ width: `${(l.nilai / maksLayanan) * 100}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Pelanggan teratas */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Pelanggan teratas
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Pembayaran masuk tahun {tahunSekarang}
+          </p>
+          {pelangganTeratas.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-400">
+              Belum ada pembayaran tahun ini.
+            </p>
+          ) : (
+            <ol className="mt-4 space-y-2">
+              {pelangganTeratas.map((p, i) => (
+                <li
+                  key={p.nama}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="angka flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-[10px] font-bold text-cyan-300">
+                      {i + 1}
+                    </span>
+                    <span className="truncate text-slate-300">{p.nama}</span>
+                  </span>
+                  <span className="angka shrink-0 font-medium text-slate-200">
+                    {formatRpPendek(p.jumlah)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+
+        {/* Pendapatan per tahun */}
+        <div className="kaca col-span-2 p-5 sm:p-6 md:col-span-2">
+          <h2 className="text-sm font-semibold text-slate-100">
+            Pendapatan per tahun
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">Seluruh pembayaran</p>
+          {daftarTahun.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-400">
+              Belum ada pembayaran tercatat.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-2">
+              {daftarTahun.map((t) => (
+                <li
+                  key={t.tahun}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="text-slate-300">{t.tahun}</span>
+                  <span className="angka font-medium text-emerald-300">
+                    {formatRpPendek(t.jumlah)}
+                  </span>
                 </li>
               ))}
             </ul>

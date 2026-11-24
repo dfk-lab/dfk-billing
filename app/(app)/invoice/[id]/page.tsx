@@ -5,6 +5,7 @@ import { formatRupiah, formatTanggal, hitungTotal, LABEL_METODE } from "@/lib/fo
 import PanelPembayaran, { HapusPembayaran } from "./PembayaranKontrol";
 import KirimWaInvoice from "./KirimWaInvoice";
 import PaymentLinkKontrol from "./PaymentLinkKontrol";
+import TagihanLink from "./TagihanLink";
 
 export const instant = false;
 
@@ -79,7 +80,10 @@ export default async function DetailInvoicePage({
             )}
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {invoice.status !== "DRAFT" && (
+            <TagihanLink kode={invoice.kodeTagihan} />
+          )}
           <KirimWaInvoice
             invoiceId={invoice.id}
             telepon={invoice.pelanggan.telepon}

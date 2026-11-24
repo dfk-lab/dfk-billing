@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatRupiah, formatTanggal, hitungTotal, LABEL_METODE } from "@/lib/format";
+import { urlTagihan } from "@/lib/tagihan";
 import {
   DEFAULT_TEMPLATE_KWITANSI,
   DEFAULT_TEMPLATE_TAGIHAN,
@@ -272,6 +273,7 @@ export async function waKirimTagihanKePelanggan(
       : "—",
     ketTempo,
     linkBayar: inv.paymentLinkUrl ?? "",
+    linkTagihan: urlTagihan(setting?.urlPublik ?? "", inv.kodeTagihan),
   });
 
   const hasil = await kirimWaAman(inv.pelanggan.telepon, pesan, {

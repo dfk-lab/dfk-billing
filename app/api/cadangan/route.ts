@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { dumpCadangan } from "@/lib/cadangan";
+import { kodeTagihanBaru } from "@/lib/tagihan";
 
 export async function GET() {
   const data = await dumpCadangan();
@@ -57,6 +58,12 @@ export async function POST(request: Request) {
   const dataKwitansi = (isi.kwitansi ?? []) as Prisma.KwitansiUncheckedCreateInput[];
   const dataInvoice = isi.invoice.map((inv) => {
     const { items, ...utama } = inv as Record<string, unknown>;
+    // Cadangan lama: kolom yang sudah dihapus + kodeTagihan yang belum ada
+    delete (utama as Record<string, unknown>).waPengingatDikirim;
+    const kode = (utama as Record<string, unknown>).kodeTagihan;
+    if (typeof kode !== "string" || !/^[0-9a-f]{32}$/.test(kode)) {
+      (utama as Record<string, unknown>).kodeTagihan = kodeTagihanBaru();
+    }
     const itemsBersih = (Array.isArray(items) ? items : []).map((it) => {
       const { invoiceId, ...tanpaFk } = it as Record<string, unknown>;
       return tanpaFk as Prisma.InvoiceItemUncheckedCreateInput;
@@ -66,6 +73,9 @@ export async function POST(request: Request) {
       items: itemsBersih,
     };
   });
+  if (dataSetting) {
+    delete (dataSetting as Record<string, unknown>).lastRunPengingatWa;
+  }
 
   try {
     const hasil = await prisma.$transaction(async (tx) => {

@@ -35,12 +35,15 @@ type Pengaturan = {
   waApiPassword: string | null;
   waNomorAdmin: string | null;
   waPengingatPelangganAktif: boolean;
+  waPengingatHari: string;
+  waPengingatJam: number;
   waTemplateTagihan: string;
   waTemplateKwitansi: string;
   midtransAktif: boolean;
   midtransServerKey: string;
   midtransMode: string;
   midtransApiUrl: string;
+  urlPublik: string;
 };
 
 const UKURAN_GAMBAR_MAKS = 2 * 1024 * 1024;
@@ -664,9 +667,65 @@ export default function PengaturanPage() {
                 Kirim pengingat jatuh tempo langsung ke pelanggan
               </label>
               <p className="mt-1 text-xs text-slate-500">
-                Otomatis harian: H-3, H-1, dan sekali saat lewat tempo. Hanya
-                pelanggan yang punya nomor WA, bukan draft, dan belum lunas.
+                Otomatis sekali per hari sesuai daftar hari di bawah, ditambah
+                sekali saat lewat tempo (maks 30 hari). Hanya pelanggan yang
+                punya nomor WA, bukan draft, dan belum lunas.
               </p>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className={labelCls} htmlFor="waPengingatHari">
+                    Hari pengingat (H-)
+                  </label>
+                  <input
+                    id="waPengingatHari"
+                    type="text"
+                    inputMode="numeric"
+                    value={form.waPengingatHari}
+                    onChange={(e) => ubah("waPengingatHari", e.target.value)}
+                    className={inputCls}
+                    placeholder="3,1,0"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Pisahkan dengan koma. 0 = dikirim di hari jatuh tempo.
+                  </p>
+                </div>
+                <div>
+                  <label className={labelCls} htmlFor="waPengingatJam">
+                    Jam kirim pengingat
+                  </label>
+                  <input
+                    id="waPengingatJam"
+                    type="number"
+                    min={0}
+                    max={23}
+                    value={form.waPengingatJam}
+                    onChange={(e) =>
+                      ubah("waPengingatJam", Number(e.target.value))
+                    }
+                    className={inputCls}
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Waktu Indonesia Barat (0–23).
+                  </p>
+                </div>
+                <div>
+                  <label className={labelCls} htmlFor="urlPublik">
+                    URL publik aplikasi (opsional)
+                  </label>
+                  <input
+                    id="urlPublik"
+                    type="text"
+                    placeholder="http://192.168.1.10:4000"
+                    value={form.urlPublik}
+                    onChange={(e) => ubah("urlPublik", e.target.value)}
+                    className={inputCls}
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Alamat aplikasi yang bisa dibuka pelanggan — dipakai
+                    variabel {"{linkTagihan}"} di template tagihan.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-5 border-t border-white/10 pt-4 lg:grid-cols-2">

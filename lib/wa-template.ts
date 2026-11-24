@@ -29,6 +29,7 @@ export const VAR_TAGIHAN = [
   "jatuhTempo",
   "ketTempo",
   "linkBayar",
+  "linkTagihan",
 ] as const;
 
 export const VAR_KWITANSI = [
@@ -60,6 +61,7 @@ export const CONTOH_VAR_TAGIHAN: Record<string, string> = {
   jatuhTempo: "26 Nov 2026",
   ketTempo: " (3 hari lagi)",
   linkBayar: "https://sandbox.midtrans.com/pay/abc123",
+  linkTagihan: "http://192.168.1.10:4000/tagihan/abc123…",
 };
 
 export const CONTOH_VAR_KWITANSI: Record<string, string> = {

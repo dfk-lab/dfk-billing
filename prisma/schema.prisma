@@ -39,9 +39,11 @@ model Setting {
   midtransServerKey   String  @default("")
   midtransMode        String  @default("sandbox")
   midtransApiUrl      String  @default("")
+  urlPublik           String  @default("")
+  waPengingatHari     String  @default("3,1,0")
+  waPengingatJam      Int     @default(8)
   lastRunInvoiceOtomatis DateTime?
   lastRunBackupOtomatis  DateTime?
-  lastRunPengingatWa     DateTime?
   lastRunPengingatWaPelanggan DateTime?
   updatedAt         DateTime @updatedAt
 }
@@ -89,6 +91,7 @@ model Layanan {
 model Invoice {
   id             Int           @id @default(autoincrement())
   nomor          String        @unique
+  kodeTagihan    String        @unique
   pelangganId    Int
   pelanggan      Pelanggan     @relation(fields: [pelangganId], references: [id])
   layananId      Int?
@@ -100,7 +103,6 @@ model Invoice {
   diskonPersen   Float         @default(0)
   ppnPersen      Float         @default(0)
   dibuatOtomatis Boolean       @default(false)
-  waPengingatDikirim Boolean  @default(false)
   waPengingatPelangganStage Int @default(0)
   paymentLinkId     String?
   paymentLinkUrl    String?

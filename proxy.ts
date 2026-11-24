@@ -12,6 +12,7 @@ const TERLARANG_PETUGAS = [
   "/api/otomatis",
   "/api/backup-otomatis",
   "/api/cadangan",
+  "/api/laporan",
 ];
 
 export async function proxy(request: NextRequest) {
@@ -54,5 +55,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!login|api/auth|api/logo|_next|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    "/((?!login|tagihan|api/auth|api/tagihan|api/logo|_next|favicon.ico|.*\\..*).*)",
+  ],
 };

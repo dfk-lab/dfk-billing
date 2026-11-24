@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { dataInvoice, nomorInvoiceBerikutnya } from "@/lib/invoice";
+import { kodeTagihanBaru } from "@/lib/tagihan";
 import { waInvoiceBaru } from "@/lib/wa";
 
 export async function GET(request: Request) {
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       data: {
         ...dataUtama,
         nomor,
+        kodeTagihan: kodeTagihanBaru(),
         items: { create: items },
       },
       include: { items: true, pembayaran: true },
