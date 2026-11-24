@@ -18,6 +18,7 @@ model Setting {
   namaBank          String?
   noRekening        String?
   atasNamaRekening  String?
+  gambarQris        String?
   gambarTandaTangan String?
   footerDokumen     String?
   catatanKwitansi   String?

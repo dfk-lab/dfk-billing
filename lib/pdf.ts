@@ -29,6 +29,7 @@ type SettingPdf = {
   namaBank?: string | null;
   noRekening?: string | null;
   atasNamaRekening?: string | null;
+  gambarQris?: string | null;
   gambarTandaTangan?: string | null;
   footerDokumen?: string | null;
   catatanKwitansi?: string | null;
@@ -341,29 +342,54 @@ export function buatInvoicePdf(inv: InvoicePdf, s: SettingPdf): Promise<Buffer> 
       doc.text(inv.catatan, M, doc.y + 5, { width: DALAM, lineGap: 1 });
     }
 
-    // Kotak bank
+    // Kotak pembayaran (transfer bank / QRIS)
     const bankAda = s.namaBank || s.noRekening || s.atasNamaRekening;
-    if (bankAda) {
-      const teksBank = `${[s.namaBank, s.noRekening]
-        .filter(Boolean)
-        .join(" — ")}${s.atasNamaRekening ? ` a.n. ${s.atasNamaRekening}` : ""}`;
-      doc.font("Helvetica-Bold").fontSize(9).fillColor(GELAP);
-      doc.text("Pembayaran via transfer bank:", M + 10, TINGGI - M - 78);
-      doc.font("Helvetica").fontSize(9).fillColor("#3f3f46");
-      doc.text(teksBank, M + 10, doc.y + 4);
-      const tinggiKotak = doc.y - (TINGGI - M - 78) + 14;
+    const qrisBuf = s.gambarQris ? dataUrlKeBuffer(s.gambarQris) : null;
+    if (bankAda || qrisBuf) {
+      const teksBank = bankAda
+        ? `${[s.namaBank, s.noRekening]
+            .filter(Boolean)
+            .join(" — ")}${s.atasNamaRekening ? ` a.n. ${s.atasNamaRekening}` : ""}`
+        : null;
+      const lebarTeks = DALAM - 20 - (qrisBuf ? 88 : 0);
+      doc.font("Helvetica").fontSize(9);
+      const tinggiTeks = teksBank
+        ? Math.max(doc.heightOfString(teksBank, { width: lebarTeks }), 12)
+        : 0;
+      const atas = TINGGI - M - 84 - (qrisBuf ? 20 : 0);
+      const tinggiKotak = Math.max(qrisBuf ? 100 : 0, 38 + tinggiTeks);
+      // Kotak digambar sebelum teks & gambar agar tidak menutupinya
       doc.save();
-      doc
-        .rect(M, TINGGI - M - 84, DALAM, tinggiKotak + 6)
-        .fillAndStroke("#fafafa", GARIS);
+      doc.rect(M, atas, DALAM, tinggiKotak).fillAndStroke("#fafafa", GARIS);
       doc.restore();
+      doc.font("Helvetica-Bold").fontSize(9).fillColor(GELAP);
+      doc.text(
+        bankAda ? "Pembayaran via transfer bank:" : "Pembayaran via QRIS:",
+        M + 10,
+        atas + 10
+      );
+      doc.font("Helvetica").fontSize(9).fillColor("#3f3f46");
+      if (teksBank) {
+        doc.text(teksBank, M + 10, doc.y + 4, { width: lebarTeks, lineGap: 1 });
+      }
+      if (qrisBuf) {
+        doc.text("Scan QRIS di samping", M + 10, doc.y + 4, {
+          width: lebarTeks,
+          lineGap: 1,
+        });
+        try {
+          doc.image(qrisBuf, LEBAR - M - 88, atas + 10, { fit: [76, 76] });
+        } catch {
+          // gambar tidak didukung pdfkit — lewati
+        }
+      }
     }
 
-    // Tanda tangan
+    // Tanda tangan — dinaikkan saat ada QRIS agar tidak menimpa kotak pembayaran
     tandaTangan(
       doc,
       s,
-      TINGGI - M - 130,
+      TINGGI - M - 130 - (qrisBuf ? 20 : 0),
       "Hormat kami,",
       s.namaPemilik || s.namaUsaha || "DFK Billing"
     );

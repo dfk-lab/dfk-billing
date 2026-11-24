@@ -37,6 +37,7 @@ export default async function CetakInvoicePage({
     namaBank: null,
     noRekening: null,
     atasNamaRekening: null,
+    gambarQris: null,
     gambarTandaTangan: null,
     footerDokumen: null,
   };
@@ -49,6 +50,7 @@ export default async function CetakInvoicePage({
   const dibayar = invoice.pembayaran.reduce((acc, p) => acc + p.jumlah, 0);
   const sisa = Math.max(total - dibayar, 0);
   const bankAda = s.namaBank || s.noRekening || s.atasNamaRekening;
+  const pembayaranAda = bankAda || s.gambarQris;
 
   return (
     <div data-tema="gelap" className="kertas-wrap min-h-screen overflow-x-auto bg-zinc-100 p-6">
@@ -212,14 +214,43 @@ export default async function CetakInvoicePage({
           </div>
         )}
 
-        {/* Bank */}
-        {bankAda && (
+        {/* Pembayaran */}
+        {pembayaranAda && (
           <div className="mt-6 border border-zinc-300 bg-zinc-50 px-4 py-3 text-[10pt]">
-            <p className="font-semibold">Pembayaran via transfer bank:</p>
-            <p className="mt-0.5">
-              {[s.namaBank, s.noRekening].filter(Boolean).join(" — ")}
-              {s.atasNamaRekening ? ` a.n. ${s.atasNamaRekening}` : ""}
-            </p>
+            <div className="flex items-center gap-5">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  {bankAda
+                    ? "Pembayaran via transfer bank:"
+                    : "Pembayaran via QRIS:"}
+                </p>
+                {bankAda && (
+                  <p className="mt-0.5">
+                    {[s.namaBank, s.noRekening].filter(Boolean).join(" — ")}
+                    {s.atasNamaRekening ? ` a.n. ${s.atasNamaRekening}` : ""}
+                  </p>
+                )}
+                {s.gambarQris && (
+                  <p className="mt-1 text-zinc-600">
+                    Atau scan kode QRIS di samping menggunakan aplikasi
+                    pembayaran apa pun.
+                  </p>
+                )}
+              </div>
+              {s.gambarQris && (
+                <div className="shrink-0 text-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={s.gambarQris}
+                    alt="QRIS"
+                    className="h-[28mm] w-[28mm] object-contain"
+                  />
+                  <p className="text-[8pt] font-medium text-zinc-500">
+                    Scan QRIS
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

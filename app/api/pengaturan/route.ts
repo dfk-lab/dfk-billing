@@ -13,6 +13,7 @@ const stringFields = [
   "namaBank",
   "noRekening",
   "atasNamaRekening",
+  "gambarQris",
   "gambarTandaTangan",
   "footerDokumen",
   "catatanKwitansi",
@@ -83,7 +84,7 @@ export async function PUT(request: Request) {
   const data = ambilData(body);
   const existing = await prisma.setting.findFirst();
   const lama = existing as unknown as Record<string, unknown> | null;
-  for (const kunci of ["logo", "gambarTandaTangan"]) {
+  for (const kunci of ["logo", "gambarTandaTangan", "gambarQris"]) {
     const nilaiLama = lama?.[kunci];
     if (
       typeof nilaiLama === "string" &&

@@ -8,12 +8,12 @@ const EKSTENSI: Record<string, string> = {
   "image/webp": "webp",
 };
 
-const JENIS = ["logo", "ttd"];
+const JENIS = ["logo", "ttd", "qris"];
 
 export const UKURAN_MAKS = 2 * 1024 * 1024;
 
 // Ketentuan nama berkas: <jenis>-<YYYYMMDD>-<kode unik 8 hex>.<ekstensi>
-const POLA_NAMA = /^(logo|ttd)-(\d{8})-([0-9a-f]{8})\.(png|jpg|webp)$/;
+const POLA_NAMA = /^(logo|ttd|qris)-(\d{8})-([0-9a-f]{8})\.(png|jpg|webp)$/;
 
 export function dirUpload(): string {
   return process.env.UPLOAD_DIR || "./upload";

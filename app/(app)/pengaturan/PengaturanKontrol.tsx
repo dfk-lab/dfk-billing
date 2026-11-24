@@ -21,6 +21,7 @@ type Pengaturan = {
   namaBank: string | null;
   noRekening: string | null;
   atasNamaRekening: string | null;
+  gambarQris: string | null;
   gambarTandaTangan: string | null;
   footerDokumen: string | null;
   catatanKwitansi: string | null;
@@ -58,8 +59,10 @@ export default function PengaturanPage() {
   const [pesan, setPesan] = useState("");
   const [logoPratinjau, setLogoPratinjau] = useState<string | null>(null);
   const [ttdPratinjau, setTtdPratinjau] = useState<string | null>(null);
+  const [qrisPratinjau, setQrisPratinjau] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
   const ttdRef = useRef<HTMLInputElement>(null);
+  const qrisRef = useRef<HTMLInputElement>(null);
 
   const [pwLama, setPwLama] = useState("");
   const [pwBaru, setPwBaru] = useState("");
@@ -83,6 +86,7 @@ export default function PengaturanPage() {
         setForm(data);
         setLogoPratinjau(data.logo);
         setTtdPratinjau(data.gambarTandaTangan);
+        setQrisPratinjau(data.gambarQris);
       });
   }, []);
 
@@ -92,7 +96,7 @@ export default function PengaturanPage() {
 
   async function unggahGambar(
     file: File,
-    jenis: "logo" | "ttd",
+    jenis: "logo" | "ttd" | "qris",
     muat: (url: string) => void
   ) {
     if (file.size > UKURAN_GAMBAR_MAKS) {
@@ -372,6 +376,54 @@ export default function PengaturanPage() {
                   className={inputCls}
                 />
               </div>
+            </div>
+
+            <div>
+              <span className={labelCls}>Foto QRIS (opsional)</span>
+              {qrisPratinjau ? (
+                <div className="mt-2 flex items-center gap-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrisPratinjau}
+                    alt="QRIS"
+                    className="h-24 w-24 rounded-lg border border-white/20 pratinjau-latar object-contain p-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQrisPratinjau(null);
+                      ubah("gambarQris", "");
+                      if (qrisRef.current) qrisRef.current.value = "";
+                    }}
+                    className="text-sm text-rose-400 hover:underline"
+                  >
+                    Hapus QRIS
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    ref={qrisRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file)
+                        unggahGambar(file, "qris", (url) => {
+                          setQrisPratinjau(url);
+                          ubah("gambarQris", url);
+                          if (qrisRef.current) qrisRef.current.value = "";
+                        });
+                    }}
+                    className="mt-1 block text-sm"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Unggah foto QRIS dari aplikasi pembayaran Anda. Tampil di
+                    invoice (cetak &amp; PDF) di samping info transfer agar
+                    pelanggan bisa langsung scan.
+                  </p>
+                </>
+              )}
             </div>
           </section>
 

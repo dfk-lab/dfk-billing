@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (jenis !== "logo" && jenis !== "ttd") {
+  if (jenis !== "logo" && jenis !== "ttd" && jenis !== "qris") {
     return NextResponse.json(
       { error: "Jenis unggahan tidak dikenal." },
       { status: 400 }
