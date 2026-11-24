@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 const TERLARANG_PETUGAS = [
   "/pengaturan",
   "/laporan",
+  "/wa",
   "/api/pengaturan",
   "/api/upload",
   "/api/otomatis",

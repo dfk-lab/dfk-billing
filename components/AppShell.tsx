@@ -120,6 +120,16 @@ const menu = [
     ),
   },
   {
+    href: "/wa",
+    label: "Notifikasi WA",
+    ikon: (
+      <>
+        <path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 003.4 0" />
+      </>
+    ),
+  },
+  {
     href: "/pengaturan",
     label: "Pengaturan",
     ikon: (
@@ -149,7 +159,10 @@ export default function AppShell({
 
   const menuTersedia =
     role === "PETUGAS"
-      ? menu.filter((m) => m.href !== "/pengaturan" && m.href !== "/laporan")
+      ? menu.filter(
+          (m) =>
+            m.href !== "/pengaturan" && m.href !== "/laporan" && m.href !== "/wa"
+        )
       : menu;
   const menuBawah = menuTersedia.filter((m) => isiBawah.includes(m.href));
   const menuLembar = menuTersedia.filter((m) => !isiBawah.includes(m.href));
@@ -181,10 +194,10 @@ export default function AppShell({
     <div className="min-h-screen">
       {/* Sidebar kiri — layar sedang ke atas */}
       <aside className="sidebar no-print fixed inset-y-0 left-0 z-40 hidden w-64 flex-col md:flex">
-        <Link href="/" className="flex items-center gap-3 px-5 py-5">
-          <LogoUsaha size={36} className="shrink-0 drop-shadow-[0_0_10px_rgba(34,211,238,0.45)]" />
+        <Link href="/" className="flex items-center gap-3.5 px-5 py-4">
+          <LogoUsaha size={48} className="shrink-0" />
           <span>
-            <span className="block text-sm font-semibold tracking-tight text-slate-100">
+            <span className="block text-base font-semibold tracking-tight text-slate-100">
               DFK Billing
             </span>
             <span className="block text-xs text-slate-500">
@@ -244,8 +257,8 @@ export default function AppShell({
 
       {/* Bar atas — mobile */}
       <header className="navbar no-print sticky top-0 z-40 flex h-14 items-center gap-3 px-4 md:hidden">
-        <Link href="/" className="flex items-center gap-2.5">
-          <LogoUsaha size={32} className="shrink-0 drop-shadow-[0_0_10px_rgba(34,211,238,0.45)]" />
+        <Link href="/" className="flex items-center gap-3">
+          <LogoUsaha size={40} className="shrink-0" />
           <span className="text-sm font-semibold tracking-tight text-slate-100">
             DFK Billing
           </span>

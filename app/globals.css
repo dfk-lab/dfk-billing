@@ -404,6 +404,11 @@ select.masukan option {
   color: #94a3b8;
   border-color: rgba(148, 163, 184, 0.22);
 }
+.badge-emerald {
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.28);
+}
 [data-tema="terang"] .badge-cyan {
   background: rgba(8, 145, 178, 0.1);
   color: #0e7490;
@@ -423,6 +428,11 @@ select.masukan option {
   background: rgba(15, 23, 42, 0.06);
   color: #475569;
   border-color: rgba(15, 23, 42, 0.16);
+}
+[data-tema="terang"] .badge-emerald {
+  background: rgba(5, 150, 105, 0.1);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.3);
 }
 
 /* ===== Notifikasi & kotak info ===== */
@@ -649,13 +659,90 @@ select.masukan option {
   border-top: 1px solid var(--garis);
 }
 
+/* ===== Logo hidup & animasi identitas ===== */
+.logo-hidup {
+  animation: logo-nyala 3.4s ease-in-out infinite;
+}
+@keyframes logo-nyala {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.35));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 13px rgba(34, 211, 238, 0.6));
+    transform: scale(1.05);
+  }
+}
+
+/* Icon bertransisi saat kursor mendekat */
+.nav-side svg,
+.tombol-utama svg,
+.tombol-halus svg,
+.tombol-mini svg,
+.tombol-bahaya svg,
+.bar-bawah-taut svg {
+  transition: transform 0.18s ease;
+}
+.nav-side:hover svg,
+.tombol-utama:hover svg,
+.tombol-halus:hover svg,
+.tombol-mini:hover svg,
+.tombol-bahaya:hover svg,
+.bar-bawah-taut:hover svg {
+  transform: scale(1.12);
+}
+
+/* Umpan balik tekan tombol */
+.tombol-utama,
+.tombol-halus,
+.tombol-mini,
+.tombol-bahaya {
+  transition: transform 0.15s ease, background 0.15s, color 0.15s,
+    border-color 0.15s, filter 0.15s, box-shadow 0.15s;
+}
+.tombol-utama:active,
+.tombol-halus:active,
+.tombol-mini:active,
+.tombol-bahaya:active {
+  transform: scale(0.96);
+}
+
+/* Kartu yang bisa diklik terangkat halus */
+.kaca {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+a.kaca:hover,
+button.kaca:hover {
+  transform: translateY(-2px);
+}
+
 /* Hormati preferensi gerak minimal pengguna */
 @media (prefers-reduced-motion: reduce) {
   .muncul,
   .batang-grafik,
   .sheet,
-  .dot {
+  .dot,
+  .logo-hidup {
     animation: none;
+  }
+  .nav-side svg,
+  .tombol-utama svg,
+  .tombol-halus svg,
+  .tombol-mini svg,
+  .tombol-bahaya svg,
+  .bar-bawah-taut svg {
+    transition: none;
+  }
+  .tombol-utama:active,
+  .tombol-halus:active,
+  .tombol-mini:active,
+  .tombol-bahaya:active {
+    transform: none;
+  }
+  a.kaca:hover,
+  button.kaca:hover {
+    transform: none;
   }
 }
 

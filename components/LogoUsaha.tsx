@@ -11,7 +11,7 @@ export default function LogoUsaha({
       alt="Logo usaha"
       width={size}
       height={size}
-      className={`rounded-lg object-contain ${className}`}
+      className={`logo-hidup rounded-lg object-contain ${className}`}
     />
   );
 }

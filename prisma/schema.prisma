@@ -140,3 +140,17 @@ model Kwitansi {
   penerima     String?
   createdAt    DateTime   @default(now())
 }
+
+// Log pesan WhatsApp — snapshot tanpa FK agar tetap utuh saat data terkait dihapus
+model PesanWa {
+  id            Int      @id @default(autoincrement())
+  jenis         String
+  status        String   @default("TERKIRIM")
+  nomorTujuan   String
+  pesan         String   @default("")
+  namaPelanggan String?
+  nomorInvoice  String?
+  nomorKwitansi String?
+  keterangan    String?
+  createdAt     DateTime @default(now())
+}

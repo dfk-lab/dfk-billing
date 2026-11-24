@@ -22,6 +22,41 @@ export function normalisasiNomor(input: string): string | null {
 
 type HasilWa = { ok: boolean; pesan: string };
 
+export type MetaWa = {
+  jenis: string;
+  keterangan?: string | null;
+  namaPelanggan?: string | null;
+  nomorInvoice?: string | null;
+  nomorKwitansi?: string | null;
+};
+
+export async function catatPesanWa(
+  nomor: string,
+  pesan: string,
+  hasil: HasilWa | null,
+  meta: MetaWa
+) {
+  try {
+    await prisma.pesanWa.create({
+      data: {
+        jenis: meta.jenis,
+        status: hasil?.ok ? "TERKIRIM" : "GAGAL",
+        nomorTujuan: normalisasiNomor(nomor) || nomor,
+        pesan,
+        namaPelanggan: meta.namaPelanggan ?? null,
+        nomorInvoice: meta.nomorInvoice ?? null,
+        nomorKwitansi: meta.nomorKwitansi ?? null,
+        keterangan:
+          [meta.keterangan, hasil && !hasil.ok ? hasil.pesan : null]
+            .filter(Boolean)
+            .join(" · ") || null,
+      },
+    });
+  } catch (e) {
+    console.warn("[wa] gagal mencatat log pesan:", e);
+  }
+}
+
 export async function kirimWa(
   nomor: string,
   pesan: string,
@@ -94,15 +129,19 @@ export async function kirimWa(
 
 export async function kirimWaAman(
   nomor: string | null | undefined,
-  pesan: string
+  pesan: string,
+  meta: MetaWa = { jenis: "LAINNYA" }
 ): Promise<HasilWa | null> {
   if (!nomor || !nomor.trim()) return null;
   try {
     const hasil = await kirimWa(nomor, pesan);
     if (!hasil.ok) console.warn(`[wa] ${hasil.pesan}`);
+    await catatPesanWa(nomor, pesan, hasil, meta);
     return hasil;
   } catch (e) {
+    const pesanGagal = e instanceof Error ? e.message : String(e);
     console.warn("[wa]", e);
+    await catatPesanWa(nomor, pesan, { ok: false, pesan: pesanGagal }, meta);
     return null;
   }
 }
@@ -145,7 +184,11 @@ export async function waInvoiceBaru(invoiceId: number): Promise<HasilWa | null> 
     barisJatuhTempo +
     `\nTerima kasih atas kepercayaan Anda.`;
 
-  return kirimWaAman(inv.pelanggan.telepon, pesan);
+  return kirimWaAman(inv.pelanggan.telepon, pesan, {
+    jenis: "INVOICE_BARU",
+    namaPelanggan: inv.pelanggan.nama,
+    nomorInvoice: inv.nomor,
+  });
 }
 
 export async function waPembayaranDiterima(
@@ -171,7 +214,12 @@ export async function waPembayaranDiterima(
     (bayar.kwitansi ? `No. Kwitansi: ${bayar.kwitansi.nomor}\n` : "") +
     `\nTerima kasih.`;
 
-  return kirimWaAman(bayar.invoice.pelanggan.telepon, pesan);
+  return kirimWaAman(bayar.invoice.pelanggan.telepon, pesan, {
+    jenis: "PEMBAYARAN",
+    namaPelanggan: bayar.invoice.pelanggan.nama,
+    nomorInvoice: bayar.invoice.nomor,
+    nomorKwitansi: bayar.kwitansi?.nomor ?? null,
+  });
 }
 
 async function ringkasanTagihan(invoiceId: number) {
@@ -187,7 +235,8 @@ async function ringkasanTagihan(invoiceId: number) {
 
 export async function waKirimTagihanKePelanggan(
   invoiceId: number,
-  ketTempo = ""
+  ketTempo = "",
+  opsi: { jenis?: string; keterangan?: string } = {}
 ): Promise<HasilWa> {
   const inv = await ringkasanTagihan(invoiceId);
   if (!inv) return { ok: false, pesan: "Invoice tidak ditemukan." };
@@ -225,7 +274,12 @@ export async function waKirimTagihanKePelanggan(
     linkBayar: inv.paymentLinkUrl ?? "",
   });
 
-  const hasil = await kirimWaAman(inv.pelanggan.telepon, pesan);
+  const hasil = await kirimWaAman(inv.pelanggan.telepon, pesan, {
+    jenis: opsi.jenis ?? "TAGIHAN",
+    keterangan: opsi.keterangan ?? "Manual",
+    namaPelanggan: inv.pelanggan.nama,
+    nomorInvoice: inv.nomor,
+  });
   return hasil ?? { ok: false, pesan: "Gagal mengirim WhatsApp." };
 }
 
@@ -265,7 +319,14 @@ export async function waKirimKwitansiKePelanggan(
 
   const hasil = await kirimWaAman(
     k.pembayaran.invoice.pelanggan.telepon,
-    pesan
+    pesan,
+    {
+      jenis: "KWITANSI",
+      keterangan: "Manual",
+      namaPelanggan: k.pembayaran.invoice.pelanggan.nama,
+      nomorInvoice: k.pembayaran.invoice.nomor,
+      nomorKwitansi: k.nomor,
+    }
   );
   return hasil ?? { ok: false, pesan: "Gagal mengirim WhatsApp." };
 }

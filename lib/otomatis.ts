@@ -281,7 +281,13 @@ async function kirimPengingatJatuhTempo(namaUsaha: string): Promise<number> {
         `Jatuh tempo: HARI INI (${formatTanggal(inv.jatuhTempo!.toISOString())})\n` +
         `Total: ${formatRupiah(total)}\n` +
         `Sisa: ${formatRupiah(total - dibayar)}\n\n` +
-        `Mohon segera lakukan pembayaran. Terima kasih.`
+        `Mohon segera lakukan pembayaran. Terima kasih.`,
+      {
+        jenis: "PENGINGAT",
+        keterangan: "Otomatis — jatuh tempo hari ini",
+        namaPelanggan: inv.pelanggan.nama,
+        nomorInvoice: inv.nomor,
+      }
     );
     if (hasil?.ok) {
       terkirim += 1;
@@ -377,7 +383,10 @@ async function kirimPengingatPelanggan(): Promise<number> {
     }
     if (!inv.pelanggan.telepon) continue;
 
-    const hasil = await waKirimTagihanKePelanggan(inv.id, ketTempo);
+    const hasil = await waKirimTagihanKePelanggan(inv.id, ketTempo, {
+      jenis: "PENGINGAT",
+      keterangan: `Otomatis${ketTempo}`,
+    });
     if (hasil.ok) {
       terkirim += 1;
       await prisma.invoice.update({
