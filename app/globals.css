@@ -227,6 +227,31 @@ select.masukan option {
   color: #0f172a;
 }
 
+/* Menu saran (autocomplete nama layanan) */
+.menu-saran {
+  position: absolute;
+  z-index: 20;
+  margin-top: 0.25rem;
+  width: 100%;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid var(--kaca-border);
+  border-radius: 10px;
+  background: var(--modal-bg);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.menu-saran button:hover,
+.menu-saran button:focus-visible {
+  background: rgba(34, 211, 238, 0.12);
+  outline: none;
+}
+[data-tema="terang"] .menu-saran button:hover,
+[data-tema="terang"] .menu-saran button:focus-visible {
+  background: rgba(8, 145, 178, 0.1);
+}
+
 /* ===== Tombol ===== */
 .tombol-utama {
   display: inline-flex;

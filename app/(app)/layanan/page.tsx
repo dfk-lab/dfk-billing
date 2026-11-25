@@ -9,7 +9,7 @@ export default async function LayananPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const q = (await searchParams).q?.trim() ?? "";
-  const [daftar, pelanggan] = await Promise.all([
+  const [daftar, pelanggan, katalog] = await Promise.all([
     prisma.layanan.findMany({
       where: q
         ? {
@@ -24,6 +24,9 @@ export default async function LayananPage({
       orderBy: [{ status: "asc" }, { tanggalAkhir: "asc" }],
     }),
     prisma.pelanggan.findMany({ orderBy: { nama: "asc" } }),
+    prisma.layanan.findMany({
+      select: { nama: true, deskripsi: true, harga: true, periode: true, status: true },
+    }),
   ]);
 
   const serial = daftar.map((l) => ({
@@ -44,6 +47,7 @@ export default async function LayananPage({
     <LayananClient
       daftar={serial}
       pelanggan={pelanggan.map((p) => ({ id: p.id, nama: p.nama }))}
+      katalog={katalog}
       q={q}
     />
   );

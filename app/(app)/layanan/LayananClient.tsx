@@ -25,6 +25,14 @@ export type Layanan = {
   perpanjangOtomatis: boolean;
 };
 
+export type KatalogLayanan = {
+  nama: string;
+  deskripsi: string | null;
+  harga: number;
+  periode: string;
+  status: string;
+};
+
 type FormLayanan = {
   pelangganId: string;
   nama: string;
@@ -88,10 +96,12 @@ function badgeAuto(l: Layanan) {
 export default function LayananClient({
   daftar,
   pelanggan,
+  katalog,
   q,
 }: {
   daftar: Layanan[];
   pelanggan: { id: number; nama: string }[];
+  katalog: KatalogLayanan[];
   q: string;
 }) {
   const router = useRouter();
@@ -100,10 +110,39 @@ export default function LayananClient({
   const [pilihan, setPilihan] = useState<Layanan | null>(null);
   const [form, setForm] = useState<FormLayanan>(kosongForm(""));
   const [menyimpan, setMenyimpan] = useState(false);
+  const [saranTerbuka, setSaranTerbuka] = useState(false);
   const [notifikasi, setNotifikasi] = useState<{
     jenis: "ok" | "gagal";
     teks: string;
   } | null>(null);
+
+  const produkUnik = useMemo(() => {
+    const map = new Map<string, KatalogLayanan>();
+    for (const k of katalog) {
+      const kunci = k.nama.trim().toLowerCase();
+      const ada = map.get(kunci);
+      if (!ada || (ada.status !== "AKTIF" && k.status === "AKTIF")) map.set(kunci, k);
+    }
+    return [...map.values()].sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+  }, [katalog]);
+
+  const saranNama = useMemo(() => {
+    const kunci = form.nama.trim().toLowerCase();
+    return produkUnik
+      .filter((p) => !kunci || p.nama.toLowerCase().includes(kunci))
+      .slice(0, 8);
+  }, [produkUnik, form.nama]);
+
+  function pilihProduk(p: KatalogLayanan) {
+    setForm((f) => ({
+      ...f,
+      nama: p.nama,
+      deskripsi: p.deskripsi ?? f.deskripsi,
+      harga: String(p.harga),
+      periode: p.periode,
+    }));
+    setSaranTerbuka(false);
+  }
 
   const ringkasLayanan = useMemo(() => {
     let aktif = 0;
@@ -458,7 +497,7 @@ export default function LayananClient({
                   ))}
                 </select>
               </div>
-              <div>
+              <div className="relative">
                 <label className={labelCls} htmlFor="f-nama">
                   Nama layanan *
                 </label>
@@ -466,11 +505,40 @@ export default function LayananClient({
                   id="f-nama"
                   type="text"
                   required
+                  autoComplete="off"
                   placeholder="cth. Domain .com, Hosting, VPS, Jasa setup"
                   value={form.nama}
                   onChange={(e) => setForm({ ...form, nama: e.target.value })}
+                  onFocus={() => setSaranTerbuka(true)}
+                  onBlur={() => setTimeout(() => setSaranTerbuka(false), 120)}
                   className={inputCls}
                 />
+                {modal === "baru" && saranTerbuka && saranNama.length > 0 && (
+                  <ul className="menu-saran">
+                    {saranNama.map((p) => (
+                      <li key={p.nama}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => pilihProduk(p)}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm"
+                        >
+                          <span className="truncate">{p.nama}</span>
+                          <span className="shrink-0 text-xs text-slate-500">
+                            {formatRupiah(p.harga)} ·{" "}
+                            {LABEL_PERIODE[p.periode] ?? p.periode}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {modal === "baru" && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Ketik atau pilih nama layanan yang pernah dipakai — harga,
+                    periode, dan deskripsi terisi otomatis.
+                  </p>
+                )}
               </div>
               <div>
                 <label className={labelCls} htmlFor="f-deskripsi">
