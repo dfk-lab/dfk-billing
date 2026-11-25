@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connection } from "next/server";
+import { wajibAdmin } from "@/lib/auth";
 import {
   buatCadanganOtomatis,
   daftarCadanganOtomatis,
@@ -9,6 +10,13 @@ import {
 } from "@/lib/otomatis";
 
 export async function GET() {
+  const sesi = await wajibAdmin();
+  if (!sesi) {
+    return NextResponse.json(
+      { error: "Hanya ADMIN yang dapat mengakses fitur ini." },
+      { status: 403 }
+    );
+  }
   await connection();
   return NextResponse.json({
     ...(await statusOtomatis()),
@@ -17,6 +25,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const sesi = await wajibAdmin();
+  if (!sesi) {
+    return NextResponse.json(
+      { error: "Hanya ADMIN yang dapat menjalankan otomatisasi." },
+      { status: 403 }
+    );
+  }
   const body = (await request.json().catch(() => null)) as {
     aksi?: string;
     aktif?: boolean;

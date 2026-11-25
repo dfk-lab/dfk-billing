@@ -1,15 +1,15 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
-import { ambilSesi } from "@/lib/auth";
+import { wajibAdmin } from "@/lib/auth";
 import { folderCadangan, validasiNamaCadangan } from "@/lib/otomatis";
 
 type Params = { params: Promise<{ nama: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
-  const sesi = await ambilSesi();
+  const sesi = await wajibAdmin();
   if (!sesi) {
-    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 403 });
   }
   const { nama } = await params;
   if (!validasiNamaCadangan(nama)) {
@@ -29,9 +29,9 @@ export async function GET(_request: Request, { params }: Params) {
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
-  const sesi = await ambilSesi();
+  const sesi = await wajibAdmin();
   if (!sesi) {
-    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 403 });
   }
   const { nama } = await params;
   if (!validasiNamaCadangan(nama)) {

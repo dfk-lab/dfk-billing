@@ -42,7 +42,11 @@ Buka <http://localhost:4000> — saat pertama kali Anda diminta membuat password
    cd dfk-billing
    ```
 
-2. Buka file `docker-compose.yml` dan **ganti nilai `AUTH_SECRET`** dengan string acak panjang (misal hasil `openssl rand -hex 32`).
+2. Buat file `.env` di folder repo dengan kunci rahasia `AUTH_SECRET` (string acak panjang, misal hasil `openssl rand -hex 32`). Aplikasi **menolak start** jika `AUTH_SECRET` kosong atau masih nilai default:
+
+   ```bash
+   echo AUTH_SECRET=\"$(openssl rand -hex 32)\" > .env
+   ```
 
 3. Buat aplikasi Compose di CasaOS: **App Store → Install (ikon +) → Custom Install**, atau dari terminal:
 
@@ -60,7 +64,7 @@ mkdir -p data
 docker run -d --name dfk-billing --restart unless-stopped \
   -p 4000:4000 \
   -e DATABASE_URL=file:/app/data/dfk.db \
-  -e AUTH_SECRET="ganti-dengan-string-acak-panjang" \
+  -e AUTH_SECRET="wajib-diisi-string-acak-panjang" \
   -e CADANGAN_DIR=/app/data/cadangan-otomatis \
   -e UPLOAD_DIR=/app/data/upload \
   -v "$(pwd)/data:/app/data" \

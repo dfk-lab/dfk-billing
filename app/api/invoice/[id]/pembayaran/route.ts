@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { dataPembayaran, nomorKwitansiBerikutnya } from "@/lib/pembayaran";
+import { buatPembayaranDenganKwitansi, dataPembayaran } from "@/lib/pembayaran";
 import { waPembayaranDiterima } from "@/lib/wa";
 
 type Konteks = { params: Promise<{ id: string }> };
@@ -24,24 +24,26 @@ export async function POST(request: Request, { params }: Konteks) {
     return NextResponse.json({ error: "Invoice tidak ditemukan." }, { status: 404 });
   }
 
-  const nomor = await nomorKwitansiBerikutnya();
   let penerima = data.penerima;
   if (!penerima) {
     const setting = await prisma.setting.findFirst();
     penerima = setting?.namaPemilik?.trim() || null;
   }
 
-  const pembayaran = await prisma.pembayaran.create({
-    data: {
-      invoiceId,
+  try {
+    const pembayaran = await buatPembayaranDenganKwitansi(invoiceId, {
       jumlah: data.jumlah,
       tanggal: data.tanggal,
       metode: data.metode,
       catatan: data.catatan,
-      kwitansi: { create: { nomor, penerima } },
-    },
-    include: { kwitansi: true },
-  });
-  void waPembayaranDiterima(pembayaran.id).catch(() => {});
-  return NextResponse.json(pembayaran, { status: 201 });
+      penerima,
+    });
+    void waPembayaranDiterima(pembayaran.id).catch(() => {});
+    return NextResponse.json(pembayaran, { status: 201 });
+  } catch {
+    return NextResponse.json(
+      { error: "Gagal menyimpan pembayaran — terjadi tabrakan nomor kwitansi, coba lagi." },
+      { status: 400 }
+    );
+  }
 }

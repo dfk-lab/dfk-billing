@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ambilSesi, hashPassword } from "@/lib/auth";
-
-async function wajibAdmin() {
-  const sesi = await ambilSesi();
-  if (!sesi || sesi.role !== "ADMIN") return null;
-  return sesi;
-}
+import { hashPassword, wajibAdmin } from "@/lib/auth";
 
 export async function GET() {
   const sesi = await wajibAdmin();

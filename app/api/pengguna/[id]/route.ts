@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ambilSesi, hashPassword } from "@/lib/auth";
+import { hashPassword, wajibAdmin } from "@/lib/auth";
 
 type Konteks = { params: Promise<{ id: string }> };
-
-async function wajibAdmin() {
-  const sesi = await ambilSesi();
-  if (!sesi || sesi.role !== "ADMIN") return null;
-  return sesi;
-}
 
 export async function PATCH(request: Request, { params }: Konteks) {
   const sesi = await wajibAdmin();

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { hitungTotal, formatRupiah } from "@/lib/format";
-import { nomorKwitansiBerikutnya } from "@/lib/pembayaran";
+import { buatPembayaranDenganKwitansi } from "@/lib/pembayaran";
 import { waPembayaranDiterima } from "@/lib/wa";
 
 const LABEL_STATUS: Record<string, string> = {
@@ -202,20 +202,14 @@ export async function cekStatusPembayaran(
     if (sisa <= 0) {
       return { ok: true, pesan: "Invoice sudah lunas.", lunas: true };
     }
-    const nomor = await nomorKwitansiBerikutnya();
     const metode =
       j.payment_type === "qris" || j.payment_type === "gopay" ? "QRIS" : "TRANSFER";
-    const pembayaran = await prisma.pembayaran.create({
-      data: {
-        invoiceId,
-        jumlah: sisa,
-        metode,
-        catatan: `Midtrans (${j.payment_type ?? "-"})`,
-        kwitansi: {
-          create: { nomor, penerima: setting.namaPemilik?.trim() || null },
-        },
-      },
-      include: { kwitansi: true },
+    const pembayaran = await buatPembayaranDenganKwitansi(invoiceId, {
+      jumlah: sisa,
+      tanggal: new Date(),
+      metode,
+      catatan: `Midtrans (${j.payment_type ?? "-"})`,
+      penerima: setting.namaPemilik?.trim() || null,
     });
     void waPembayaranDiterima(pembayaran.id).catch(() => {});
     return {

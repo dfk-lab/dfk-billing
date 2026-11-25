@@ -35,6 +35,19 @@ export async function PUT(request: Request, { params }: Konteks) {
     return NextResponse.json({ error: error.join(" ") }, { status: 400 });
   }
   const { items, ...dataUtama } = data;
+  const existing = await prisma.invoice.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Invoice tidak ditemukan." }, { status: 404 });
+  }
+  if (existing.status === "TERKIRIM" && dataUtama.status === "DRAFT") {
+    return NextResponse.json(
+      { error: "Invoice sudah terbit — tidak bisa kembali menjadi draft." },
+      { status: 400 }
+    );
+  }
   try {
     const invoice = await prisma.invoice.update({
       where: { id },

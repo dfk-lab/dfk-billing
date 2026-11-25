@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { dataInvoice, nomorInvoiceBerikutnya } from "@/lib/invoice";
 import { kodeTagihanBaru } from "@/lib/tagihan";
 import { waInvoiceBaru } from "@/lib/wa";
@@ -49,25 +50,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.join(" ") }, { status: 400 });
   }
   const { items, ...dataUtama } = data;
-  try {
-    const nomor = await nomorInvoiceBerikutnya();
-    const invoice = await prisma.invoice.create({
-      data: {
-        ...dataUtama,
-        nomor,
-        kodeTagihan: kodeTagihanBaru(),
-        items: { create: items },
-      },
-      include: { items: true, pembayaran: true },
-    });
-    if (invoice.status !== "DRAFT") {
-      void waInvoiceBaru(invoice.id).catch(() => {});
+  let terakhir: unknown = null;
+  for (let i = 0; i < 5; i++) {
+    try {
+      const nomor = await nomorInvoiceBerikutnya();
+      const invoice = await prisma.invoice.create({
+        data: {
+          ...dataUtama,
+          nomor,
+          kodeTagihan: kodeTagihanBaru(),
+          items: { create: items },
+        },
+        include: { items: true, pembayaran: true },
+      });
+      if (invoice.status !== "DRAFT") {
+        void waInvoiceBaru(invoice.id).catch(() => {});
+      }
+      return NextResponse.json(invoice, { status: 201 });
+    } catch (e) {
+      terakhir = e;
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        (e.code === "P2002" || e.code === "P2003") &&
+        i < 4
+      )
+        continue;
+      break;
     }
-    return NextResponse.json(invoice, { status: 201 });
-  } catch {
+  }
+  if (
+    terakhir instanceof Prisma.PrismaClientKnownRequestError &&
+    terakhir.code === "P2002"
+  ) {
     return NextResponse.json(
-      { error: "Pelanggan atau layanan tidak ditemukan." },
+      { error: "Terjadi tabrakan nomor dokumen — coba lagi." },
       { status: 400 }
     );
   }
+  return NextResponse.json(
+    { error: "Pelanggan atau layanan tidak ditemukan." },
+    { status: 400 }
+  );
 }

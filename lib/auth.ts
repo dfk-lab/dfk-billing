@@ -26,6 +26,11 @@ export async function ambilSesi() {
   return verifikasiToken(token);
 }
 
+export async function wajibAdmin() {
+  const sesi = await ambilSesi();
+  return sesi && sesi.role === "ADMIN" ? sesi : null;
+}
+
 export function hashPassword(plain: string) {
   return bcrypt.hashSync(plain, 10);
 }

@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { wajibAdmin } from "@/lib/auth";
 import { dumpCadangan } from "@/lib/cadangan";
 import { kodeTagihanBaru } from "@/lib/tagihan";
 
 export async function GET() {
+  const sesi = await wajibAdmin();
+  if (!sesi) {
+    return NextResponse.json(
+      { error: "Hanya ADMIN yang dapat mengakses fitur ini." },
+      { status: 403 }
+    );
+  }
   const data = await dumpCadangan();
   return new NextResponse(JSON.stringify(data, null, 2), {
     headers: {
@@ -28,6 +36,13 @@ type Dump = {
 };
 
 export async function POST(request: Request) {
+  const sesi = await wajibAdmin();
+  if (!sesi) {
+    return NextResponse.json(
+      { error: "Hanya ADMIN yang dapat memulihkan cadangan." },
+      { status: 403 }
+    );
+  }
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
   if (!file || typeof file === "string") {
@@ -46,6 +61,26 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { error: "Struktur cadangan tidak dikenali — bagian pelanggan, invoice, atau pengguna tidak ada." },
+      { status: 400 }
+    );
+  }
+  if (isi.pengguna.length === 0) {
+    return NextResponse.json(
+      { error: "Cadangan tidak memuat satu pun pengguna — tidak aman dipulihkan karena akan menghapus semua akun." },
+      { status: 400 }
+    );
+  }
+  if (
+    isi.pengguna.some(
+      (p) =>
+        typeof p.nama !== "string" ||
+        p.nama.trim() === "" ||
+        typeof p.passwordHash !== "string" ||
+        p.passwordHash.length < 20
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Setiap pengguna pada cadangan harus punya nama dan hash password yang valid." },
       { status: 400 }
     );
   }

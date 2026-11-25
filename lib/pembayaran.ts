@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 const METODE = ["TUNAI", "TRANSFER", "QRIS", "LAINNYA"];
 
@@ -55,4 +56,29 @@ export async function nomorKwitansiBerikutnya() {
     if (Number.isFinite(n)) urut = n + 1;
   }
   return `${awalan}${String(urut).padStart(4, "0")}`;
+}
+
+export async function buatPembayaranDenganKwitansi(
+  invoiceId: number,
+  data: { jumlah: number; tanggal: Date; metode: string; catatan: string | null; penerima: string | null }
+) {
+  const { penerima, ...pembayaranData } = data;
+  for (let i = 0; i < 5; i++) {
+    try {
+      const nomor = await nomorKwitansiBerikutnya();
+      return await prisma.pembayaran.create({
+        data: {
+          ...pembayaranData,
+          invoiceId,
+          kwitansi: { create: { nomor, penerima } },
+        },
+        include: { kwitansi: true },
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002" && i < 4)
+        continue;
+      throw e;
+    }
+  }
+  throw new Error("Nomor kwitansi tidak dapat dibuat — coba lagi.");
 }

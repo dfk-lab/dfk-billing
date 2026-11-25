@@ -32,7 +32,7 @@ type Pengaturan = {
   waAktif: boolean;
   waApiUrl: string;
   waApiUser: string | null;
-  waApiPassword: string | null;
+  waApiPasswordTersimpan: boolean;
   waNomorAdmin: string | null;
   waPengingatPelangganAktif: boolean;
   waPengingatHari: string;
@@ -40,7 +40,7 @@ type Pengaturan = {
   waTemplateTagihan: string;
   waTemplateKwitansi: string;
   midtransAktif: boolean;
-  midtransServerKey: string;
+  midtransServerKeyTersimpan: boolean;
   midtransMode: string;
   midtransApiUrl: string;
   urlPublik: string;
@@ -70,6 +70,8 @@ export default function PengaturanPage() {
   const [pwLama, setPwLama] = useState("");
   const [pwBaru, setPwBaru] = useState("");
   const [pwKonfirmasi, setPwKonfirmasi] = useState("");
+  const [pwWa, setPwWa] = useState("");
+  const [skMidtrans, setSkMidtrans] = useState("");
   const [pwStatus, setPwStatus] = useState<
     "idle" | "menyimpan" | "berhasil" | "gagal"
   >("idle");
@@ -127,12 +129,19 @@ export default function PengaturanPage() {
     e.preventDefault();
     if (!form) return;
     setStatus("menyimpan");
+    const badan: Record<string, unknown> = { ...form };
+    if (pwWa.trim()) badan.waApiPassword = pwWa;
+    if (skMidtrans.trim()) badan.midtransServerKey = skMidtrans;
     const res = await fetch("/api/pengaturan", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(badan),
     });
     if (res.ok) {
+      const data = (await res.json()) as Pengaturan;
+      setForm(data);
+      setPwWa("");
+      setSkMidtrans("");
       setStatus("tersimpan");
       setPesan("");
       setTimeout(() => setStatus("idle"), 2000);
@@ -158,7 +167,7 @@ export default function PengaturanPage() {
         nomor: form.waNomorAdmin,
         url: form.waApiUrl,
         user: form.waApiUser ?? "",
-        pass: form.waApiPassword ?? "",
+        pass: pwWa.trim() ? pwWa : undefined,
       }),
     });
     const data = (await res.json().catch(() => null)) as {
@@ -632,10 +641,20 @@ export default function PengaturanPage() {
                   id="waApiPassword"
                   type="password"
                   autoComplete="new-password"
-                  value={form.waApiPassword ?? ""}
-                  onChange={(e) => ubah("waApiPassword", e.target.value || null)}
+                  value={pwWa}
+                  onChange={(e) => setPwWa(e.target.value)}
+                  placeholder={
+                    form.waApiPasswordTersimpan
+                      ? "Tersimpan — isi untuk mengganti"
+                      : ""
+                  }
                   className={inputCls}
                 />
+                {form.waApiPasswordTersimpan && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Kosongkan untuk tetap memakai password tersimpan.
+                  </p>
+                )}
               </div>
               <div>
                 <label className={labelCls} htmlFor="waNomorAdmin">
@@ -868,12 +887,19 @@ export default function PengaturanPage() {
                 id="midtransServerKey"
                 type="password"
                 autoComplete="new-password"
-                value={form.midtransServerKey}
-                onChange={(e) => ubah("midtransServerKey", e.target.value)}
+                value={skMidtrans}
+                onChange={(e) => setSkMidtrans(e.target.value)}
+                placeholder={
+                  form.midtransServerKeyTersimpan
+                    ? "Tersimpan — isi untuk mengganti"
+                    : ""
+                }
                 className={inputCls}
               />
               <p className="mt-1 text-xs text-slate-500">
-                Dari dashboard Midtrans — Settings → Access Keys.
+                {form.midtransServerKeyTersimpan
+                  ? "Kosongkan untuk tetap memakai server key tersimpan."
+                  : "Dari dashboard Midtrans — Settings → Access Keys."}
               </p>
             </div>
             <div>

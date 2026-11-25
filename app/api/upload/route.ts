@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
 import { connection } from "next/server";
+import { wajibAdmin } from "@/lib/auth";
 import { UKURAN_MAKS, simpanBerkas } from "@/lib/upload";
 
 export async function POST(request: Request) {
+  const sesi = await wajibAdmin();
+  if (!sesi) {
+    return NextResponse.json(
+      { error: "Hanya ADMIN yang dapat mengunggah berkas." },
+      { status: 403 }
+    );
+  }
   await connection();
   const form = await request.formData();
   const berkas = form.get("berkas");
